@@ -51,6 +51,9 @@ import org.jboss.as.threads.ThreadFactoryResourceDefinition;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.msc.service.ServiceTarget;
+import org.wildfly.annotations.Description;
+import org.wildfly.annotations.Descriptions;
+import org.wildfly.annotations.ResourcePath;
 import org.wildfly.extension.batch.jberet._private.Capabilities;
 import org.wildfly.extension.batch.jberet.deployment.BatchDependencyProcessor;
 import org.wildfly.extension.batch.jberet.deployment.BatchDeploymentDescriptorParser_1_0;
@@ -62,6 +65,12 @@ import org.wildfly.extension.batch.jberet.job.repository.JdbcJobRepositoryDefini
 import org.wildfly.extension.batch.jberet.thread.pool.BatchThreadPoolResourceDefinition;
 import org.wildfly.extension.requestcontroller.RequestControllerExtension;
 
+@ResourcePath("batch.jberet")
+@Descriptions({
+        @Description("Batch Subsystem (JSR-352)"),
+        @Description(name = "add", value="Adds the batch subsystem."),
+        @Description(name = "remove", value="Removes the batch subsystem.")
+})
 public class BatchSubsystemDefinition extends SimpleResourceDefinition {
 
     /**
@@ -71,6 +80,7 @@ public class BatchSubsystemDefinition extends SimpleResourceDefinition {
     public static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, NAME);
     static final String THREAD_FACTORY = "thread-factory";
 
+    @Description("The name of the default job repository.")
     static final SimpleAttributeDefinition DEFAULT_JOB_REPOSITORY = SimpleAttributeDefinitionBuilder.create("default-job-repository", ModelType.STRING, false)
             .setAllowExpression(false)
             .setAttributeGroup("environment")
@@ -79,6 +89,7 @@ public class BatchSubsystemDefinition extends SimpleResourceDefinition {
             .setRestartAllServices()
             .build();
 
+    @Description("The name of the default thread-pool.")
     static final SimpleAttributeDefinition DEFAULT_THREAD_POOL = SimpleAttributeDefinitionBuilder.create("default-thread-pool", ModelType.STRING, false)
             .setAllowExpression(false)
             .setAttributeGroup("environment")

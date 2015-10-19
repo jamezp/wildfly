@@ -28,10 +28,12 @@ import org.jboss.as.controller.ModelVersion;
 import org.jboss.as.controller.SubsystemRegistration;
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
+import org.wildfly.annotations.ServiceProvider;
 import org.wildfly.extension.batch.jberet.deployment.BatchDeploymentResourceDefinition;
 import org.wildfly.extension.batch.jberet.deployment.BatchJobExecutionResourceDefinition;
 import org.wildfly.extension.batch.jberet.deployment.BatchJobResourceDefinition;
 
+@ServiceProvider(Extension.class)
 public class BatchSubsystemExtension implements Extension {
 
     private static final int MANAGEMENT_API_MAJOR_VERSION = 1;

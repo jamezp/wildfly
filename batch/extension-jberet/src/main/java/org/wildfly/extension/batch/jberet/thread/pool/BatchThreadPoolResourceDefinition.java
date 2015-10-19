@@ -51,6 +51,10 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.ServiceTarget;
+import org.wildfly.annotations.Description;
+import org.wildfly.annotations.Descriptions;
+import org.wildfly.annotations.ResourceDescriptions;
+import org.wildfly.annotations.ResourcePath;
 import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
 import org.wildfly.extension.batch.jberet.BatchServiceNames;
 import org.wildfly.extension.batch.jberet._private.Capabilities;
@@ -61,6 +65,16 @@ import org.wildfly.extension.batch.jberet.impl.JobExecutorService;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
+@ResourceDescriptions(packageName = "org.wildfly.extension.batch.jberet")
+@ResourcePath("batch.jberet.thread-pool")
+@Descriptions({
+        @Description("The thread pool used for batch jobs. Note that the max-thread attribute should always be greater " +
+                "than 3. Two threads are reserved to ensure partition jobs can execute."),
+        @Description(name = "add", value = "Adds an unbounded thread pool."),
+        @Description(name = "remove", value = "Removes an unbounded thread pool."),
+        @Description(name = "name", value = "The name of the thread pool."),
+        @Description(name = "rejected-count", value = "The number of tasks that have been rejected.")
+})
 public class BatchThreadPoolResourceDefinition extends SimpleResourceDefinition {
 
     public static final String NAME = "thread-pool";

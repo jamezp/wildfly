@@ -39,6 +39,10 @@ import org.jboss.as.server.Services;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.msc.service.ServiceTarget;
+import org.wildfly.annotations.Description;
+import org.wildfly.annotations.Descriptions;
+import org.wildfly.annotations.ResourceDescriptions;
+import org.wildfly.annotations.ResourcePath;
 import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
 import org.wildfly.extension.batch.jberet._private.Capabilities;
 
@@ -47,6 +51,13 @@ import org.wildfly.extension.batch.jberet._private.Capabilities;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
+@ResourceDescriptions(packageName = "org.wildfly.extension.batch.jberet")
+@ResourcePath("batch.jberet.jdbc-job-repository")
+@Descriptions({
+        @Description("A job repository that stores job information in a database."),
+        @Description(name = "add", value = "Adds a JDBC job repository."),
+        @Description(name = "remove", value = "Removes a JDBC job repository.")
+})
 public class JdbcJobRepositoryDefinition extends SimpleResourceDefinition {
 
     public static final String NAME = "jdbc-job-repository";
@@ -55,6 +66,7 @@ public class JdbcJobRepositoryDefinition extends SimpleResourceDefinition {
     /**
      * A data-source attribute which requires the {@link Capabilities#DATA_SOURCE_CAPABILITY}.
      */
+    @Description("The data source name used to connect to the database.")
     public static final SimpleAttributeDefinition DATA_SOURCE = SimpleAttributeDefinitionBuilder.create("data-source", ModelType.STRING, false)
             .setCapabilityReference(Capabilities.DATA_SOURCE_CAPABILITY, Capabilities.JOB_REPOSITORY_CAPABILITY.getName(), true)
             .setRestartAllServices()

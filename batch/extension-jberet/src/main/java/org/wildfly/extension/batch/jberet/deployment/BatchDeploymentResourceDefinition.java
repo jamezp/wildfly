@@ -45,12 +45,19 @@ import org.jboss.as.controller.operations.validation.LongRangeValidator;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
+import org.wildfly.annotations.Description;
+import org.wildfly.annotations.Descriptions;
+import org.wildfly.annotations.ResourceDescriptions;
+import org.wildfly.annotations.ResourcePath;
 import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
 import org.wildfly.extension.batch.jberet.BatchSubsystemDefinition;
 
 /**
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
+@ResourceDescriptions(packageName = "org.wildfly.extension.batch.jberet")
+@ResourcePath("batch.jberet.deployment")
+@Description("Information about the batch subsystem for the deployment.")
 public class BatchDeploymentResourceDefinition extends SimpleResourceDefinition {
 
     private static final ResourceDescriptionResolver DEFAULT_RESOLVER = BatchResourceDescriptionResolver.getResourceDescriptionResolver("deployment");
@@ -65,18 +72,34 @@ public class BatchDeploymentResourceDefinition extends SimpleResourceDefinition 
     private static final SimpleMapAttributeDefinition PROPERTIES = new SimpleMapAttributeDefinition.Builder("properties", ModelType.STRING, true)
             .build();
 
+    @Descriptions({
+            @Description("Starts a batch job."),
+            @Description(name = "start-job.job-xml-name", value = "The name of the job XML file to use when starting the job."),
+            @Description(name = "start-job.properties", value = "Optional properties to use when starting the batch job."),
+    })
     private static final SimpleOperationDefinition START_JOB = new SimpleOperationDefinitionBuilder("start-job", DEFAULT_RESOLVER)
             .setParameters(JOB_XML_NAME, PROPERTIES)
             .setReplyType(ModelType.LONG)
             .setRuntimeOnly()
             .build();
 
+
+    @Descriptions({
+            @Description("Restarts a batch job. Only jobs in a STOPPED or FAILED state can be restarted."),
+            @Description(name = "restart-job.execution-id", value = "The execution id of the job to restart. This must be the most recent job execution id."),
+            @Description(name = "restart-job.properties", value = "Optional properties to use when restarting the batch job."),
+    })
     private static final SimpleOperationDefinition RESTART_JOB = new SimpleOperationDefinitionBuilder("restart-job", DEFAULT_RESOLVER)
             .setParameters(EXECUTION_ID, PROPERTIES)
             .setReplyType(ModelType.LONG)
             .setRuntimeOnly()
             .build();
 
+
+    @Descriptions({
+            @Description("Stops a running batch job."),
+            @Description(name = "stop-job.job-xml-name", value = "The execution id of the job to be stopped.")
+    })
     private static final SimpleOperationDefinition STOP_JOB = new SimpleOperationDefinitionBuilder("stop-job", DEFAULT_RESOLVER)
             .setParameters(EXECUTION_ID)
             .setRuntimeOnly()

@@ -31,6 +31,10 @@ import org.jboss.as.controller.ReloadRequiredRemoveStepHandler;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
+import org.wildfly.annotations.Description;
+import org.wildfly.annotations.Descriptions;
+import org.wildfly.annotations.ResourceDescriptions;
+import org.wildfly.annotations.ResourcePath;
 import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
 import org.wildfly.extension.batch.jberet._private.Capabilities;
 
@@ -39,6 +43,13 @@ import org.wildfly.extension.batch.jberet._private.Capabilities;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
+@ResourceDescriptions(packageName = "org.wildfly.extension.batch.jberet")
+@ResourcePath("batch.jberet.in-memory-job-repository")
+@Descriptions({
+        @Description("A job repository that stores job information in memory."),
+        @Description(name = "add", value = "Adds an in-memory job repository."),
+        @Description(name = "remove", value = "Removes an in-memory job repository.")
+})
 public class InMemoryJobRepositoryDefinition extends SimpleResourceDefinition {
 
     public static final String NAME = "in-memory-job-repository";

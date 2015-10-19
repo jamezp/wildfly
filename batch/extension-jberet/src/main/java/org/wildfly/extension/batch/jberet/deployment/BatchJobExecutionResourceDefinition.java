@@ -49,6 +49,10 @@ import org.jboss.as.controller.descriptions.ResourceDescriptionResolver;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
+import org.wildfly.annotations.Description;
+import org.wildfly.annotations.Descriptions;
+import org.wildfly.annotations.ResourceDescriptions;
+import org.wildfly.annotations.ResourcePath;
 import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
 
 /**
@@ -56,33 +60,43 @@ import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
+@ResourceDescriptions(packageName = "org.wildfly.extension.batch.jberet")
+@ResourcePath("batch.jberet.deployment.job.execution")
+@Description("The execution information for the job with the value of the path being the execution id.")
 public class BatchJobExecutionResourceDefinition extends SimpleResourceDefinition {
     static final String EXECUTION = "execution";
 
+    @Description("The instance id for the execution.")
     static final SimpleAttributeDefinition INSTANCE_ID = SimpleAttributeDefinitionBuilder.create("instance-id", ModelType.LONG)
             .setStorageRuntime()
             .build();
 
+    @Description("The status of the execution.")
     static final SimpleAttributeDefinition BATCH_STATUS = SimpleAttributeDefinitionBuilder.create("batch-status", ModelType.STRING)
             .setStorageRuntime()
             .build();
 
+    @Description("The exit status of the execution.")
     static final SimpleAttributeDefinition EXIT_STATUS = SimpleAttributeDefinitionBuilder.create("exit-status", ModelType.STRING)
             .setStorageRuntime()
             .build();
 
+    @Description("The time the execution was created in ISO 8601 format.")
     static final SimpleAttributeDefinition CREATE_TIME = SimpleAttributeDefinitionBuilder.create("create-time", ModelType.STRING)
             .setStorageRuntime()
             .build();
 
+    @Description("The time the execution entered the STARTED status in ISO 8601 format.")
     static final SimpleAttributeDefinition START_TIME = SimpleAttributeDefinitionBuilder.create("start-time", ModelType.STRING)
             .setStorageRuntime()
             .build();
 
+    @Description("The time the execution was last updated in ISO 8601 format.")
     static final SimpleAttributeDefinition LAST_UPDATED_TIME = SimpleAttributeDefinitionBuilder.create("last-updated-time", ModelType.STRING)
             .setStorageRuntime()
             .build();
 
+    @Description("The time, in ISO 8601 format, the execution entered a status of: COMPLETED, STOPPED or FAILED")
     static final SimpleAttributeDefinition END_TIME = SimpleAttributeDefinitionBuilder.create("end-time", ModelType.STRING)
             .setStorageRuntime()
             .build();
@@ -94,12 +108,17 @@ public class BatchJobExecutionResourceDefinition extends SimpleResourceDefinitio
     private static final SimpleMapAttributeDefinition PROPERTIES = new SimpleMapAttributeDefinition.Builder("properties", ModelType.STRING, true)
             .build();
 
+    @Descriptions({
+            @Description("Restarts a batch job. Only jobs in a STOPPED or FAILED state can be restarted. This must also be the most recent job execution."),
+            @Description(name = "restart-job.properties", value = "Optional properties to use when restarting the batch job.")
+    })
     private static final SimpleOperationDefinition RESTART_JOB = new SimpleOperationDefinitionBuilder("restart-job", DEFAULT_RESOLVER)
             .setParameters(PROPERTIES)
             .setReplyType(ModelType.LONG)
             .setRuntimeOnly()
             .build();
 
+    @Description("Stops a running batch job.")
     private static final SimpleOperationDefinition STOP_JOB = new SimpleOperationDefinitionBuilder("stop-job", DEFAULT_RESOLVER)
             .setRuntimeOnly()
             .build();

@@ -33,6 +33,9 @@ import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
+import org.wildfly.annotations.Description;
+import org.wildfly.annotations.ResourceDescriptions;
+import org.wildfly.annotations.ResourcePath;
 import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
 
 /**
@@ -40,13 +43,18 @@ import org.wildfly.extension.batch.jberet.BatchResourceDescriptionResolver;
  *
  * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
  */
+@ResourceDescriptions(packageName = "org.wildfly.extension.batch.jberet")
+@ResourcePath("batch.jberet.deployment.job")
+@Description("Information about a specific batch job.")
 public class BatchJobResourceDefinition extends SimpleResourceDefinition {
     static final String JOB = "job";
 
+    @Description("The number of currently running executions for the job.")
     static final SimpleAttributeDefinition RUNNING_EXECUTIONS = SimpleAttributeDefinitionBuilder.create("running-executions", ModelType.INT)
             .setStorageRuntime()
             .build();
 
+    @Description("The number of instances for the job.")
     static final SimpleAttributeDefinition INSTANCE_COUNT = SimpleAttributeDefinitionBuilder.create("instance-count", ModelType.INT)
             .setStorageRuntime()
             .build();

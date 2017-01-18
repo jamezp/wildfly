@@ -120,6 +120,33 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Configure the jboss.home for the servlet distribution -->
+                        <jboss.home>${project.build.directory}${file.separator}wildfly-servlet-dist</jboss.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.wildfly.build</groupId>
+                <artifactId>wildfly-server-provisioning-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>server-provisioning</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+                            <config-dir>${project.basedir}</config-dir>
+                            <config-file>server-provisioning.xml</config-file>
+                            <server-name>wildfly-servlet-dist</server-name>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

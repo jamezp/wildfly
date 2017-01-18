@@ -54,6 +54,23 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- Test only dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wildfly.core</groupId>
+            <artifactId>wildfly-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- TODO (jrp) this may need to be removed -->
+        <dependency>
+            <groupId>org.wildfly.core</groupId>
+            <artifactId>wildfly-core-testsuite-shared</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -71,6 +88,17 @@
                         <phase>compile</phase>
                         <configuration>
                             <config-file>server-provisioning.xml</config-file>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>server-provisioning-test</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>test-compile</phase>
+                        <configuration>
+                            <config-file>server-provisioning.xml</config-file>
+                            <server-name>${project.build.finalName}-test</server-name>
                         </configuration>
                     </execution>
                 </executions>
@@ -96,6 +124,38 @@
                             <workDirectory>${project.build.directory}/assembly/work</workDirectory>
                             <tarLongFileMode>gnu</tarLongFileMode>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Because this is a pom packaging type the testCompile and test goals must be explicitly bound to phases -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
+                    <systemPropertyVariables>
+                        <!-- Configure the jboss.home for the servlet distribution -->
+                        <jboss.home>${project.build.directory}${file.separator}${project.build.finalName}-test</jboss.home>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>run-tests</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

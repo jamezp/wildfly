@@ -70,6 +70,7 @@ public class StartupServletDistTest {
     public void startStandalone() throws Exception {
         final StandaloneCommandBuilder commandBuilder = StandaloneCommandBuilder.of(JBOSS_HOME);
         process = Launcher.of(commandBuilder)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .setRedirectErrorStream(true)
                 .launch();
         try (final ModelControllerClient client = TestSuiteEnvironment.getModelControllerClient()) {
@@ -83,6 +84,7 @@ public class StartupServletDistTest {
     public void startDomain() throws Exception {
         final DomainCommandBuilder commandBuilder = DomainCommandBuilder.of(JBOSS_HOME);
         process = Launcher.of(commandBuilder)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .setRedirectErrorStream(true)
                 .launch();
         try (final DomainClient client = DomainClient.Factory.create(TestSuiteEnvironment.getModelControllerClient())) {

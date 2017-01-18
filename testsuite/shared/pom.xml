@@ -123,6 +123,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <redirectTestOutputToFile>false</redirectTestOutputToFile>
                     <systemPropertyVariables>
                         <!-- Configure the jboss.home for the servlet distribution -->
                         <jboss.home>${project.build.directory}${file.separator}wildfly-servlet-dist</jboss.home>

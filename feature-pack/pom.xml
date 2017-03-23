@@ -1142,6 +1142,21 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>io.agroal</groupId>
+            <artifactId>agroal-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.agroal</groupId>
+            <artifactId>agroal-narayana</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.agroal</groupId>
+            <artifactId>agroal-pool</artifactId>
+        </dependency>
+
         <!--
             Netty 4
             io.netty:netty-all is for Netty 4.x versions
@@ -2325,7 +2340,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
+        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>wildfly-client-all</artifactId>
@@ -2640,6 +2655,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>wildfly-connector</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wildfly-datasources-agroal</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

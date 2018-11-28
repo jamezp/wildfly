@@ -33,6 +33,7 @@ import org.wildfly.common.Assert;
  * @author Scott Marlow
  */
 public class WildFlyCustomJtaPlatform extends JBossAppServerJtaPlatform implements JtaSynchronizationStrategy {
+    private static final String TSR_NAME = "java:jboss/TransactionSynchronizationRegistry";
 
     // The 'transactionSynchronizationRegistry' used by JPA container managed applications,
     // is reset every time the Transaction Manager service is restarted,
@@ -45,20 +46,27 @@ public class WildFlyCustomJtaPlatform extends JBossAppServerJtaPlatform implemen
     // JtaSynchronizationStrategy
     @Override
     public void registerSynchronization(Synchronization synchronization) {
-        Assert.checkNotNullParam("transactionSynchronizationRegistry", transactionSynchronizationRegistry).
+        getTransactionSynchronizationRegistry().
                 registerInterposedSynchronization(Assert.checkNotNullParam("synchronization", synchronization));
     }
 
     // JtaSynchronizationStrategy
     @Override
     public boolean canRegisterSynchronization() {
-        return Assert.checkNotNullParam("transactionSynchronizationRegistry", transactionSynchronizationRegistry).
-                getTransactionStatus() == Status.STATUS_ACTIVE;
+        return getTransactionSynchronizationRegistry().getTransactionStatus() == Status.STATUS_ACTIVE;
     }
 
     @Override
     protected JtaSynchronizationStrategy getSynchronizationStrategy() {
         return this;
+    }
+
+    private TransactionSynchronizationRegistry getTransactionSynchronizationRegistry() {
+        final TransactionSynchronizationRegistry transactionSynchronizationRegistry = WildFlyCustomJtaPlatform.transactionSynchronizationRegistry;
+        if (transactionSynchronizationRegistry != null) {
+            return transactionSynchronizationRegistry;
+        }
+        return (TransactionSynchronizationRegistry) jndiService().locate(TSR_NAME);
     }
 
     /**

@@ -54,7 +54,7 @@ public class JspELTestCase {
     @Deployment(name = Servlet_No_Spec_War)
     public static WebArchive deploy() {
         return ShrinkWrap.create(WebArchive.class)
-                .addClasses(DummyConstants.class, DummyEnum.class)
+                .addClasses(DummyConstants.class, DummyEnum.class, Person.class)
                 .addAsWebResource(JspELTestCase.class.getResource("jsp-with-el.jsp"), "index.jsp");
     }
 
@@ -128,6 +128,8 @@ public class JspELTestCase {
                 responseBody.contains("DummyConstants.FOO: --- " + DummyConstants.FOO + " ---"));
         Assert.assertTrue("Unexpected EL evaluation for ${DummyEnum.VALUE}; " + possibleCausingIssues,
                 responseBody.contains("DummyEnum.VALUE: --- " + DummyEnum.VALUE + " ---"));
+        Assert.assertTrue("Unexpected EL evaluation for ${person.name}; " + possibleCausingIssues,
+                responseBody.contains("person.name: --- " + Person.DEFAULT_NAME + " ---"));
     }
 
     /**

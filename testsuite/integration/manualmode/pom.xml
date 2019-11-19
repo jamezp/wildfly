@@ -25,6 +25,7 @@
         <jbossas.ts.integ.dir>${basedir}/..</jbossas.ts.integ.dir>
         <jbossas.ts.dir>${jbossas.ts.integ.dir}/..</jbossas.ts.dir>
         <jbossas.project.dir>${jbossas.ts.dir}/..</jbossas.project.dir>
+        <test.module.path>${project.build.directory}${file.separator}wildfly${file.separator}modules</test.module.path>
     </properties>
 
     <dependencies>

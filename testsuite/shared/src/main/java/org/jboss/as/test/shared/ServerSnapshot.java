@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 
 import org.jboss.as.arquillian.container.ManagementClient;
+import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.helpers.ClientConstants;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
@@ -41,10 +42,21 @@ public class ServerSnapshot {
      * @return A closeable that can be used to restore the server
      */
     public static AutoCloseable takeSnapshot(ManagementClient client) {
+        return takeSnapshot(client.getControllerClient());
+    }
+
+    /**
+     * Takes a snapshot of the current state of the server.
+     *
+     * Returns a AutoCloseable that can be used to restore the server state
+     * @param client The client
+     * @return A closeable that can be used to restore the server
+     */
+    public static AutoCloseable takeSnapshot(ModelControllerClient client) {
         try {
             ModelNode node = new ModelNode();
             node.get(ModelDescriptionConstants.OP).set("take-snapshot");
-            ModelNode result = client.getControllerClient().execute(node);
+            ModelNode result = client.execute(node);
             if (!"success".equals(result.get(ClientConstants.OUTCOME).asString())) {
                 fail("Reload operation didn't finish successfully: " + result.asString());
             }
@@ -57,7 +69,7 @@ public class ServerSnapshot {
 
                     ModelNode node = new ModelNode();
                     node.get(ModelDescriptionConstants.OP).set("write-config");
-                    ModelNode result = client.getControllerClient().execute(node);
+                    ModelNode result = client.execute(node);
                     if (!"success".equals(result.get(ClientConstants.OUTCOME).asString())) {
                         fail("Failed to write config after restoring from snapshot " + result.asString());
                     }

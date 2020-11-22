@@ -21,14 +21,14 @@ jaxrs ships as an empty xml element:
 
 [source,xml,options="nowrap"]
 ----
-<subsystem xmlns="urn:jboss:domain:jaxrs:2.0"/>
+<subsystem xmlns="urn:jboss:domain:jaxrs:3.0"/>
 ----
 but it can be expanded to configure parameters described in Section 3.5 "Configuration switches"
 of the RESTEasy User Guide (https://resteasy.github.io/docs). For example:
 
 [source,xml,options="nowrap"]
 
-<subsystem xmlns="urn:jboss:domain:jaxrs:2.0">
+<subsystem xmlns="urn:jboss:domain:jaxrs:3.0">
     <resteasy-add-charset>true</resteasy-add-charset>
     <resteasy-gzip-max-input>17</resteasy-gzip-max-input>
     <resteasy-jndi-resources>
@@ -63,6 +63,11 @@ Parameters "resteasy.disable.providers" and "resteasy.providers" are lists of cl
 syntax shown in the example, and "resteasy-jndi-resources" is a list of JNDI names.
 "resteasy-language-mappings" and "resteasy-media-type-mappings" are maps, using the syntax
 shown in the example.
+
+*Note.* A new RESTEasy parameter, "resteasy.original.webapplicationexception.behavior", has been added
+to revert a behavior change in how RESTEasy handles WebApplicationExceptions thrown by Clients running
+in JAX-RS resource methods. For more information, see section "ResteasyWebApplicationException" in 
+Chapter "Exception Handling" of the RESTEasy User Guide (https://resteasy.github.io/docs/ ).
 
 Things look a little different in the Command Line Interface. For example,
 

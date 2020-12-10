@@ -23,15 +23,15 @@
 package org.jboss.as.jaxrs;
 
 import org.jboss.as.controller.AttributeDefinition;
+import org.jboss.as.controller.ModelVersion;
 import org.jboss.as.controller.transform.ExtensionTransformerRegistration;
 import org.jboss.as.controller.transform.SubsystemTransformerRegistration;
 import org.jboss.as.controller.transform.description.AttributeTransformationDescriptionBuilder;
+import org.jboss.as.controller.transform.description.ChainedTransformationDescriptionBuilder;
 import org.jboss.as.controller.transform.description.DiscardAttributeChecker;
-import org.jboss.as.controller.transform.description.DiscardAttributeChecker.DiscardAttributeValueChecker;
 import org.jboss.as.controller.transform.description.RejectAttributeChecker;
 import org.jboss.as.controller.transform.description.ResourceTransformationDescriptionBuilder;
-import org.jboss.as.controller.transform.description.TransformationDescription;
-import org.jboss.dmr.ModelNode;
+import org.jboss.as.controller.transform.description.TransformationDescriptionBuilder;
 
 /**
  * Jaxrs transformers.
@@ -47,22 +47,29 @@ public class JaxrsTransformers implements ExtensionTransformerRegistration {
 
     @Override
     public void registerTransformers(SubsystemTransformerRegistration subsystemRegistration) {
-        registerTransformers_3_0_0(subsystemRegistration);
-        registerTransformers_2_0_0(subsystemRegistration);
+
+        ChainedTransformationDescriptionBuilder chainedBuilder =
+                TransformationDescriptionBuilder.Factory.createChainedSubystemInstance(subsystemRegistration.getCurrentSubsystemVersion());
+
+        //Differences between 3.0.0 and 2.0.0
+        ResourceTransformationDescriptionBuilder builder200 =
+                chainedBuilder.createBuilder(subsystemRegistration.getCurrentSubsystemVersion(), JaxrsExtension.MODEL_VERSION_2_0_0);
+        builder200.getAttributeBuilder()
+                .setDiscard(DiscardAttributeChecker.DEFAULT_VALUE, JaxrsAttribute.RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR)
+                .addRejectCheck(RejectAttributeChecker.DEFINED, JaxrsAttribute.RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR)
+                .end();
+
+        //Differences between 2.0.0 and 1.0.0
+        ResourceTransformationDescriptionBuilder builder100 =
+                chainedBuilder.createBuilder(JaxrsExtension.MODEL_VERSION_2_0_0, JaxrsExtension.MODEL_VERSION_1_0_0);
+        registerTransformers_2_0_0(builder100.getAttributeBuilder());
+        builder200.getAttributeBuilder().end();
+
+        //Create chained transformers.
+        chainedBuilder.buildAndRegister(subsystemRegistration, new ModelVersion[] {JaxrsExtension.MODEL_VERSION_1_0_0, JaxrsExtension.MODEL_VERSION_2_0_0});
     }
 
-    private static void registerTransformers_3_0_0(SubsystemTransformerRegistration subsystemRegistration) {
-       ResourceTransformationDescriptionBuilder builder = ResourceTransformationDescriptionBuilder.Factory.createSubsystemInstance();
-       AttributeTransformationDescriptionBuilder attributeBuilder = builder.getAttributeBuilder();
-       DiscardAttributeValueChecker checker = new DiscardAttributeValueChecker(false, false, ModelNode.FALSE);
-       attributeBuilder.setDiscard(checker, JaxrsAttribute.RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR);
-       attributeBuilder.addRejectCheck(RejectAttributeChecker.ALL, JaxrsAttribute.RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR);
-       TransformationDescription.Tools.register(builder.build(), subsystemRegistration, JaxrsExtension.MODEL_VERSION_2_0_0);
-    }
-
-    private static void registerTransformers_2_0_0(SubsystemTransformerRegistration subsystemRegistration) {
-        ResourceTransformationDescriptionBuilder builder = ResourceTransformationDescriptionBuilder.Factory.createSubsystemInstance();
-        AttributeTransformationDescriptionBuilder attributeBuilder = builder.getAttributeBuilder();
+    private static void registerTransformers_2_0_0(AttributeTransformationDescriptionBuilder attributeBuilder) {
         checkAttribute(attributeBuilder, JaxrsAttribute.JAXRS_2_0_REQUEST_MATCHING);
         checkAttribute(attributeBuilder, JaxrsAttribute.RESTEASY_ADD_CHARSET);
         checkAttribute(attributeBuilder, JaxrsAttribute.RESTEASY_BUFFER_EXCEPTION_ENTITY);
@@ -85,11 +92,10 @@ public class JaxrsTransformers implements ExtensionTransformerRegistration {
         checkAttribute(attributeBuilder, JaxrsAttribute.RESTEASY_USE_BUILTIN_PROVIDERS);
         checkAttribute(attributeBuilder, JaxrsAttribute.RESTEASY_USE_CONTAINER_FORM_PARAMS);
         checkAttribute(attributeBuilder, JaxrsAttribute.RESTEASY_WIDER_REQUEST_MATCHING);
-        TransformationDescription.Tools.register(builder.build(), subsystemRegistration, JaxrsExtension.MODEL_VERSION_1_0_0);
     }
 
     private static void checkAttribute(AttributeTransformationDescriptionBuilder builder, AttributeDefinition attribute) {
         builder.setDiscard(DiscardAttributeChecker.DEFAULT_VALUE, attribute)
-               .addRejectCheck(RejectAttributeChecker.DEFINED, attribute);
+                .addRejectCheck(RejectAttributeChecker.DEFINED, attribute);
     }
 }

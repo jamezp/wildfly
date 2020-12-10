@@ -149,11 +149,9 @@ public abstract class JaxrsAttribute {
             .setAttributeGroup(RESTEASY_PARAMETER_GROUP)
             .build();
 
-    public static final SimpleAttributeDefinition RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR = new SimpleAttributeDefinitionBuilder(JaxrsConstants.RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR, ModelType.BOOLEAN)
+    public static final SimpleAttributeDefinition RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR = new SimpleAttributeDefinitionBuilder(JaxrsConstants.RESTEASY_ORIGINAL_WEBAPPLICATIONEXCEPTION_BEHAVIOR, ModelType.BOOLEAN, true)
           .setRequired(false)
           .setAllowExpression(true)
-          .setValidator(new ModelTypeValidator(ModelType.BOOLEAN, false))
-          .setDefaultValue(ModelNode.FALSE)
           .setAttributeGroup(RESTEASY_PARAMETER_GROUP)
           .build();
 

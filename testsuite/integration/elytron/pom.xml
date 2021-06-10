@@ -287,6 +287,7 @@
                         <server.jvm.args>${server.jvm.args}</server.jvm.args>
                         <node0>${node0}</node0>
                     </systemPropertyVariables>
+                    <argLine>${surefire.system.args} ${jvm.args.ip.client}</argLine>
                 </configuration>
                 <executions>
                     <execution>
@@ -297,7 +298,6 @@
                         </goals>
                         <configuration>
                             <skip>false</skip>
-                            <argLine>${surefire.system.args} ${jvm.args.ip.client}</argLine>
                             <excludes>
                                 <exclude>***/UndertowSSLv2HelloTestCase</exclude>
                             </excludes>
@@ -596,6 +596,7 @@
                             <execution>
                                 <id>default-test</id>
                                 <configuration>
+                                    <skip>false</skip>
                                     <excludes combine-children="append">
                                         <!-- Needs batch -->
                                         <exclude>org/wildfly/test/integration/elytron/batch/*TestCase.java</exclude>
@@ -606,7 +607,26 @@
                                         <exclude>org/wildfly/test/integration/elytron/sasl/AnonymousSaslMechTestCase.java</exclude>
                                         <exclude>org/wildfly/test/integration/elytron/sasl/DefaultSaslConfigTestCase.java</exclude>
                                         <exclude>org/wildfly/test/integration/elytron/sasl/OtpSaslTestCase.java</exclude>
+                                        <!-- Requires special JVM security settings -->
+                                        <exclude>**/UndertowSSLv2HelloTestCase</exclude>
                                     </excludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>sslv2-tests</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>false</skip>
+                                    <argLine>-Djava.security.properties=${security.properties} ${surefire.system.args} ${jvm.args.ip.client}</argLine>
+                                    <systemPropertyVariables>
+                                        <server.jvm.args>-Djava.security.properties=${security.properties} ${server.jvm.args}</server.jvm.args>
+                                    </systemPropertyVariables>
+                                    <includes>
+                                        <include>***/UndertowSSLv2HelloTestCase</include>
+                                    </includes>
                                 </configuration>
                             </execution>
                         </executions>
@@ -726,6 +746,7 @@
                             <execution>
                                 <id>default-test</id>
                                 <configuration>
+                                    <skip>false</skip>
                                     <systemPropertyVariables>
                                         <install.dir>${project.build.directory}/${wildfly.instance.name}</install.dir>
                                         <bootable.jar>${project.build.directory}/test-wildfly.jar</bootable.jar>
@@ -741,12 +762,31 @@
                                         <exclude>org/wildfly/test/integration/elytron/sasl/AnonymousSaslMechTestCase.java</exclude>
                                         <exclude>org/wildfly/test/integration/elytron/sasl/DefaultSaslConfigTestCase.java</exclude>
                                         <exclude>org/wildfly/test/integration/elytron/sasl/OtpSaslTestCase.java</exclude>
+                                        <!-- Requires special JVM security settings -->
+                                        <exclude>**/UndertowSSLv2HelloTestCase</exclude>
                                     </excludes>
                                     <classpathDependencyExcludes>
                                         <classpathDependencyExclude>
                                             org.wildfly.arquillian:wildfly-arquillian-container-managed
                                         </classpathDependencyExclude>
                                     </classpathDependencyExcludes>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>sslv2-tests</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>false</skip>
+                                    <argLine>-Djava.security.properties=${security.properties} ${surefire.system.args} ${jvm.args.ip.client}</argLine>
+                                    <systemPropertyVariables>
+                                        <server.jvm.args>-Djava.security.properties=${security.properties} ${server.jvm.args}</server.jvm.args>
+                                    </systemPropertyVariables>
+                                    <includes>
+                                        <include>***/UndertowSSLv2HelloTestCase</include>
+                                    </includes>
                                 </configuration>
                             </execution>
                         </executions>

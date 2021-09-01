@@ -302,25 +302,26 @@
                         <version>${version.org.wildfly.plugin}</version>
                         <executions>
                             <execution>
+                                <id>elytron-config</id>
                                 <phase>process-test-resources</phase>
                                 <goals>
                                     <goal>execute-commands</goal>
                                 </goals>
+                                <configuration>
+                                    <offline>true</offline>
+                                    <scripts>
+                                        <script>${ts.elytron.cli}</script>
+                                    </scripts>
+                                    <jboss-home>${wildfly.dir}</jboss-home>
+                                    <stdout>none</stdout>
+                                    <java-opts>${modular.jdk.args}</java-opts>
+                                    <system-properties>
+                                        <maven.repo.local>${settings.localRepository}</maven.repo.local>
+                                        <module.path>${jboss.dist}/modules</module.path>
+                                    </system-properties>
+                                </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <offline>true</offline>
-                            <scripts>
-                                <script>${ts.elytron.cli}</script>
-                            </scripts>
-                            <jboss-home>${wildfly.dir}</jboss-home>
-                            <stdout>none</stdout>
-                            <java-opts>${modular.jdk.args}</java-opts>
-                            <system-properties>
-                                <maven.repo.local>${settings.localRepository}</maven.repo.local>
-                                <module.path>${jboss.dist}/modules</module.path>
-                            </system-properties>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

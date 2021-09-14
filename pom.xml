@@ -432,7 +432,9 @@
         <version.org.jboss.narayana>5.12.0.Final</version.org.jboss.narayana>
         <version.org.jboss.openjdk-orb>8.1.5.Final</version.org.jboss.openjdk-orb>
         <version.org.picketbox>5.0.3.Final-redhat-00007</version.org.picketbox>
-        <version.org.jboss.resteasy>4.7.0.Final</version.org.jboss.resteasy>
+        <version.org.jboss.resteasy>5.0.0.Alpha1</version.org.jboss.resteasy>
+        <version.org.jboss.resteasy.microprofile>1.0.0.Alpha2</version.org.jboss.resteasy.microprofile>
+        <version.org.jboss.resteasy.spring>2.0.0.Alpha1</version.org.jboss.resteasy.spring>
         <version.org.jboss.seam.int>7.0.0.GA</version.org.jboss.seam.int>
         <version.org.jboss.security.jboss-negotiation>3.0.6.Final</version.org.jboss.security.jboss-negotiation>
         <version.org.jboss.security.jbossxacml>2.0.8.Final</version.org.jboss.security.jbossxacml>
@@ -508,50 +510,6 @@
                 <version>${version.org.wildfly.core}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- Override WildFly Core's picketbox version -->
-            <dependency>
-                <groupId>org.picketbox</groupId>
-                <artifactId>picketbox</artifactId>
-                <version>${version.org.picketbox}</version>
-                <exclusions>
-                    <exclusion>
-                         <groupId>org.picketbox</groupId>
-                         <artifactId>jboss-security-spi</artifactId>
-                    </exclusion>
-                    <exclusion>
-                         <groupId>org.picketbox</groupId>
-                         <artifactId>jbosssx</artifactId>
-                    </exclusion>
-                    <exclusion>
-                         <groupId>org.picketbox</groupId>
-                         <artifactId>picketbox-bare</artifactId>
-                    </exclusion>
-                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.picketbox</groupId>
-                <artifactId>picketbox-infinispan</artifactId>
-                <version>${version.org.picketbox}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.picketbox</groupId>
-                        <artifactId>picketbox-spi-bare</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.picketbox</groupId>
-                        <artifactId>jbosssx-bare</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.jboss.logging</groupId>
-                        <artifactId>jboss-logging-spi</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.infinispan</groupId>
-                        <artifactId>infinispan-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <dependency>
@@ -7895,30 +7853,6 @@
 
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-client-microprofile</artifactId>
-                <version>${version.org.jboss.resteasy}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-client-microprofile-base</artifactId>
-                <version>${version.org.jboss.resteasy}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>*</groupId>
-                        <artifactId>*</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.resteasy</groupId>
                 <artifactId>resteasy-core</artifactId>
                 <version>${version.org.jboss.resteasy}</version>
                 <exclusions>
@@ -8039,7 +7973,7 @@
 
             <dependency>
                 <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-spring</artifactId>
+                <artifactId>resteasy-validator-provider</artifactId>
                 <version>${version.org.jboss.resteasy}</version>
                 <exclusions>
                     <exclusion>
@@ -8050,9 +7984,45 @@
             </dependency>
 
             <dependency>
-                <groupId>org.jboss.resteasy</groupId>
-                <artifactId>resteasy-validator-provider</artifactId>
-                <version>${version.org.jboss.resteasy}</version>
+                <groupId>org.jboss.resteasy.microprofile</groupId>
+                <artifactId>microprofile-rest-client</artifactId>
+                <version>${version.org.jboss.resteasy.microprofile}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.resteasy.microprofile</groupId>
+                <artifactId>microprofile-rest-client-base</artifactId>
+                <version>${version.org.jboss.resteasy.microprofile}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.resteasy.microprofile</groupId>
+                <artifactId>microprofile-config</artifactId>
+                <version>${version.org.jboss.resteasy.microprofile}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.resteasy.spring</groupId>
+                <artifactId>resteasy-spring</artifactId>
+                <version>${version.org.jboss.resteasy.spring}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>*</groupId>

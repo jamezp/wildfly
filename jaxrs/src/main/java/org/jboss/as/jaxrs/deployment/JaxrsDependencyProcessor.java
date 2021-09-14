@@ -47,6 +47,7 @@ import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_CDI;
 import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_CLIENT;
 import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_CLIENT_API;
 import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_CLIENT_MICROPROFILE;
+import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_MICROPROFILE_CONFIG;
 import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_CRYPTO;
 import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_JACKSON2;
 import static org.jboss.as.jaxrs.JaxrsSubsystemDefinition.RESTEASY_JAXB;
@@ -93,6 +94,7 @@ public class JaxrsDependencyProcessor implements DeploymentUnitProcessor {
         addDependency(moduleSpecification, moduleLoader, RESTEASY_CORE, true, deploymentBundlesClientBuilder);
         addDependency(moduleSpecification, moduleLoader, RESTEASY_CORE_SPI, true, deploymentBundlesClientBuilder);
         addDependency(moduleSpecification, moduleLoader, RESTEASY_CLIENT_MICROPROFILE, true, false);
+        addDependency(moduleSpecification, moduleLoader, RESTEASY_MICROPROFILE_CONFIG, true, false);
         addDependency(moduleSpecification, moduleLoader, RESTEASY_JAXB, true, false);
         addDependency(moduleSpecification, moduleLoader, RESTEASY_JACKSON2, true, false);
         addDependency(moduleSpecification, moduleLoader, RESTEASY_JSON_P_PROVIDER, true, false);
@@ -128,12 +130,17 @@ public class JaxrsDependencyProcessor implements DeploymentUnitProcessor {
     }
 
     private void addDependency(ModuleSpecification moduleSpecification, ModuleLoader moduleLoader,
-                               ModuleIdentifier moduleIdentifier, boolean optional, boolean deploymentBundelesClientBuilder) {
+                               String moduleIdentifier, boolean optional, boolean deploymentBundelesClientBuilder) {
         ModuleDependency dependency = new ModuleDependency(moduleLoader, moduleIdentifier, optional, false, true, false);
         if(deploymentBundelesClientBuilder) {
             dependency.addImportFilter(PathFilters.is(CLIENT_BUILDER), false);
         }
         moduleSpecification.addSystemDependency(dependency);
+    }
+
+    private void addDependency(ModuleSpecification moduleSpecification, ModuleLoader moduleLoader,
+                               ModuleIdentifier moduleIdentifier, boolean optional, boolean deploymentBundelesClientBuilder) {
+        addDependency(moduleSpecification, moduleLoader, moduleIdentifier.getName(), optional, deploymentBundelesClientBuilder);
     }
 
     @Override

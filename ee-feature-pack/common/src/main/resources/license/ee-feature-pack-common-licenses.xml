@@ -3224,7 +3224,7 @@
       </licenses>
     </dependency>
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
+      <groupId>org.jboss.resteasy.spring</groupId>
       <artifactId>resteasy-spring</artifactId>
       <licenses>
         <license>
@@ -3235,7 +3235,7 @@
       </licenses>
     </dependency>
     <dependency>
-      <groupId>org.jboss.resteasy</groupId>
+      <groupId>org.jboss.resteasy.spring</groupId>
       <artifactId>resteasy-spring</artifactId>
       <licenses>
         <license>

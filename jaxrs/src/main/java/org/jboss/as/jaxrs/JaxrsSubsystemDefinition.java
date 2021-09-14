@@ -34,6 +34,7 @@ public class JaxrsSubsystemDefinition extends SimpleResourceDefinition {
     public static final ModuleIdentifier RESTEASY_ATOM = ModuleIdentifier.create("org.jboss.resteasy.resteasy-atom-provider");
     public static final ModuleIdentifier RESTEASY_CDI = ModuleIdentifier.create("org.jboss.resteasy.resteasy-cdi");
     public static final ModuleIdentifier RESTEASY_CLIENT_MICROPROFILE = ModuleIdentifier.create("org.jboss.resteasy.resteasy-client-microprofile");
+    public static final String RESTEASY_MICROPROFILE_CONFIG = "org.jboss.resteasy.microprofile.microprofile-config";
     public static final ModuleIdentifier RESTEASY_CRYPTO = ModuleIdentifier.create("org.jboss.resteasy.resteasy-crypto");
     public static final ModuleIdentifier RESTEASY_VALIDATOR = ModuleIdentifier.create("org.jboss.resteasy.resteasy-validator-provider");
     public static final ModuleIdentifier RESTEASY_CLIENT = ModuleIdentifier.create("org.jboss.resteasy.resteasy-client");

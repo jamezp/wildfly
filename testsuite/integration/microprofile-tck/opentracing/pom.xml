@@ -108,8 +108,8 @@
         </dependency>
         <!-- RESTEasy client implementation -->
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-client-microprofile</artifactId>
+            <groupId>org.jboss.resteasy.microprofile</groupId>
+            <artifactId>microprofile-rest-client</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

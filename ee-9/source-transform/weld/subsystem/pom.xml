@@ -40,10 +40,6 @@
 
     <packaging>jar</packaging>
 
-    <properties>
-        <transformer-input-dir>${project.basedir}/../../../../weld/subsystem</transformer-input-dir>
-    </properties>
-
     <dependencies>
 
         <!-- Jakarta-namespace specific deps -->
@@ -237,23 +233,17 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
+                <groupId>org.wildfly.extras.batavia</groupId>
+                <artifactId>transformer-tools-mvn</artifactId>
+                <version>${version.org.wildfly.extras.batavia}</version>
                 <executions>
                     <execution>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <tasks>
-                                <move file="target/classes/META-INF/services/javax.enterprise.inject.spi.CDIProvider"
-                                      tofile="target/classes/META-INF/services/jakarta.enterprise.inject.spi.CDIProvider"/>
-                            </tasks>
-                        </configuration>
+                        <id>transform-sources</id>
+                        <phase>none</phase>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
 </project>

@@ -43,6 +43,7 @@ import org.jboss.as.weld.deployment.CdiAnnotationProcessor;
 import org.jboss.as.weld.deployment.processors.BeanArchiveProcessor;
 import org.jboss.as.weld.deployment.processors.BeanDefiningAnnotationProcessor;
 import org.jboss.as.weld.deployment.processors.BeansXmlProcessor;
+//import org.jboss.as.weld.deployment.processors.ConcurrentCDIExtensionDeploymentUnitProcessor;
 import org.jboss.as.weld.deployment.processors.DevelopmentModeProcessor;
 import org.jboss.as.weld.deployment.processors.EarApplicationScopedObserverMethodProcessor;
 import org.jboss.as.weld.deployment.processors.ExternalBeanArchiveProcessor;
@@ -114,6 +115,8 @@ class WeldSubsystemAdd extends AbstractBoottimeAddStepHandler {
                 processorTarget.addDeploymentProcessor(WeldExtension.SUBSYSTEM_NAME, Phase.INSTALL, Phase.INSTALL_WELD_BEAN_MANAGER, new WeldBeanManagerServiceProcessor());
                 // note that we want to go one step before Phase.CLEANUP_EE because we use metadata that it then cleans up
                 processorTarget.addDeploymentProcessor(WeldExtension.SUBSYSTEM_NAME, Phase.CLEANUP, Phase.CLEANUP_EE - 1, new WeldDeploymentCleanupProcessor());
+                // FIXME DUP phase
+                //processorTarget.addDeploymentProcessor(WeldExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_MICROPROFILE_FAULT_TOLERANCE, new ConcurrentCDIExtensionDeploymentUnitProcessor());
 
                 // Add additional deployment processors
                 ServiceLoader<DeploymentUnitProcessorProvider> processorProviders = ServiceLoader.load(DeploymentUnitProcessorProvider.class,

@@ -58,9 +58,13 @@ import org.jboss.as.ee.component.deployers.ResourceReferenceRegistrySetupProcess
 import org.jboss.as.ee.concurrent.deployers.EEConcurrentContextProcessor;
 import org.jboss.as.ee.concurrent.deployers.EEConcurrentDefaultBindingProcessor;
 import org.jboss.as.ee.concurrent.resource.definition.ContextServiceDefinitionAnnotationProcessor;
+import org.jboss.as.ee.concurrent.resource.definition.ContextServiceDefinitionDescriptorProcessor;
 import org.jboss.as.ee.concurrent.resource.definition.ManagedExecutorDefinitionAnnotationProcessor;
+import org.jboss.as.ee.concurrent.resource.definition.ManagedExecutorDefinitionDescriptorProcessor;
 import org.jboss.as.ee.concurrent.resource.definition.ManagedScheduledExecutorDefinitionAnnotationProcessor;
+import org.jboss.as.ee.concurrent.resource.definition.ManagedScheduledExecutorDefinitionDescriptorProcessor;
 import org.jboss.as.ee.concurrent.resource.definition.ManagedThreadFactoryDefinitionAnnotationProcessor;
+import org.jboss.as.ee.concurrent.resource.definition.ManagedThreadFactoryDefinitionDescriptorProcessor;
 import org.jboss.as.ee.concurrent.service.ManagedExecutorHungTasksPeriodicTerminationService;
 import org.jboss.as.ee.managedbean.processors.JavaEEDependencyProcessor;
 import org.jboss.as.ee.managedbean.processors.ManagedBeanAnnotationProcessor;
@@ -219,6 +223,11 @@ public class EeSubsystemAdd extends AbstractBoottimeAddStepHandler {
                 processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_APP_NAMING_CONTEXT, new ApplicationContextProcessor());
                 processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_EE_CONCURRENT_CONTEXT, new EEConcurrentContextProcessor());
                 processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_EE_STARTUP_COUNTDOWN, new EEStartupCountdownProcessor());
+                // FIXME use new priorities (instead of Phase.POST_MODULE_RESOURCE_DEF_XML_DATA_SOURCE)
+                processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_RESOURCE_DEF_XML_DATA_SOURCE, new ContextServiceDefinitionDescriptorProcessor());
+                processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_RESOURCE_DEF_XML_DATA_SOURCE, new ManagedExecutorDefinitionDescriptorProcessor());
+                processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_RESOURCE_DEF_XML_DATA_SOURCE, new ManagedScheduledExecutorDefinitionDescriptorProcessor());
+                processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.POST_MODULE, Phase.POST_MODULE_RESOURCE_DEF_XML_DATA_SOURCE, new ManagedThreadFactoryDefinitionDescriptorProcessor());
 
                 if (legacyJacc || elytronJacc) {
                     processorTarget.addDeploymentProcessor(EeExtension.SUBSYSTEM_NAME, Phase.INSTALL, Phase.INSTALL_JACC_POLICY, new JaccEarDeploymentProcessor(elytronJacc ? ELYTRON_JACC_CAPABILITY : LEGACY_JACC_CAPABILITY));

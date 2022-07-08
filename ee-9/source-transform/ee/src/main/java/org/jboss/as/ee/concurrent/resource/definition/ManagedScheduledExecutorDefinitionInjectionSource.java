@@ -71,7 +71,7 @@ public class ManagedScheduledExecutorDefinitionInjectionSource extends ResourceD
     }
 
     public void getResourceValue(final ResolutionContext context, final ServiceBuilder<?> serviceBuilder, final DeploymentPhaseContext phaseContext, final Injector<ManagedReferenceFactory> injector) throws DeploymentUnitProcessingException {
-        final String resourceName = uniqueName(context, jndiName);
+        final String resourceName = uniqueName(context);
         final String resourceJndiName = "java:jboss/ee/concurrency/definition/managedScheduledExecutor/"+resourceName;
         final CapabilityServiceSupport capabilityServiceSupport = phaseContext.getDeploymentUnit().getAttachment(org.jboss.as.server.deployment.Attachments.CAPABILITY_SERVICE_SUPPORT);
 
@@ -121,17 +121,6 @@ public class ManagedScheduledExecutorDefinitionInjectionSource extends ResourceD
         } catch (Exception e) {
             throw new DeploymentUnitProcessingException(e);
         }
-    }
-
-    private String uniqueName(ResolutionContext context, final String jndiName) {
-        StringBuilder name = new StringBuilder();
-        name.append(context.getApplicationName() + "_");
-        name.append(context.getModuleName() + "_");
-        if (context.getComponentName() != null) {
-            name.append(context.getComponentName() + "_");
-        }
-        name.append(jndiName);
-        return name.toString();
     }
 
     public String getContextServiceRef() {

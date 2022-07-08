@@ -53,7 +53,7 @@ public class ContextServiceDefinitionInjectionSource extends ResourceDefinitionI
     }
 
     public void getResourceValue(final ResolutionContext context, final ServiceBuilder<?> serviceBuilder, final DeploymentPhaseContext phaseContext, final Injector<ManagedReferenceFactory> injector) throws DeploymentUnitProcessingException {
-        final String resourceName = uniqueName(context, jndiName);
+        final String resourceName = uniqueName(context);
         final String resourceJndiName = "java:jboss/ee/concurrency/definition/context/"+resourceName;
         try {
             // install the resource service
@@ -109,16 +109,5 @@ public class ContextServiceDefinitionInjectionSource extends ResourceDefinitionI
 
     public void setUnchanged(String[] unchanged) {
         this.unchanged = unchanged;
-    }
-
-    private String uniqueName(ResolutionContext context, final String jndiName) {
-        StringBuilder name = new StringBuilder();
-        name.append(context.getApplicationName() + "_");
-        name.append(context.getModuleName() + "_");
-        if (context.getComponentName() != null) {
-            name.append(context.getComponentName() + "_");
-        }
-        name.append(jndiName);
-        return name.toString();
     }
 }

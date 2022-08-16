@@ -21,6 +21,7 @@
  */
 package org.jboss.as.weld;
 
+import static org.jboss.as.weld.Capabilities.PRE_PROCESSING_WELD_CAPABILITY_NAME;
 import static org.jboss.as.weld.Capabilities.WELD_CAPABILITY_NAME;
 
 import java.util.Arrays;
@@ -48,6 +49,9 @@ import org.jboss.dmr.ModelType;
 class WeldResourceDefinition extends PersistentResourceDefinition {
     static final RuntimeCapability<WeldCapability> WELD_CAPABILITY = RuntimeCapability.Builder
             .of(WELD_CAPABILITY_NAME, WeldCapabilityImpl.INSTANCE)
+            .build();
+    static final RuntimeCapability<PreProcessingWeldCapability> PRE_PROCESSING_WELD_CAPABILITY = RuntimeCapability.Builder
+            .of(PRE_PROCESSING_WELD_CAPABILITY_NAME, PreProcessingWeldCapabilityImpl.INSTANCE)
             .build();
 
     static final String REQUIRE_BEAN_DESCRIPTOR_ATTRIBUTE_NAME = "require-bean-descriptor";
@@ -98,7 +102,7 @@ class WeldResourceDefinition extends PersistentResourceDefinition {
         super( new SimpleResourceDefinition.Parameters(WeldExtension.PATH_SUBSYSTEM, WeldExtension.getResourceDescriptionResolver())
                 .setAddHandler(new WeldSubsystemAdd(ATTRIBUTES))
                 .setRemoveHandler(ReloadRequiredRemoveStepHandler.INSTANCE)
-                .setCapabilities(WELD_CAPABILITY)
+                .setCapabilities(WELD_CAPABILITY, PRE_PROCESSING_WELD_CAPABILITY)
         );
     }
 

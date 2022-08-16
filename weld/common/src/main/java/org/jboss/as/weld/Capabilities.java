@@ -27,5 +27,6 @@ package org.jboss.as.weld;
  * @author Yeray Borges
  */
 public final class Capabilities {
+    public static final String PRE_PROCESSING_WELD_CAPABILITY_NAME = "org.wildfly.weld.pre-processing";
     public static final String WELD_CAPABILITY_NAME = "org.wildfly.weld";
 }

@@ -25,6 +25,10 @@ package org.jboss.as.jaxrs;
 
 import static org.jboss.as.weld.Capabilities.WELD_CAPABILITY_NAME;
 
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Path;
+import javax.ws.rs.ext.Provider;
+
 import org.jboss.as.controller.AbstractBoottimeAddStepHandler;
 import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.OperationContext;
@@ -43,6 +47,8 @@ import org.jboss.as.jaxrs.logging.JaxrsLogger;
 import org.jboss.as.server.AbstractDeploymentChainStep;
 import org.jboss.as.server.DeploymentProcessorTarget;
 import org.jboss.as.server.deployment.Phase;
+import org.jboss.as.weld.Capabilities;
+import org.jboss.as.weld.PreProcessingWeldCapability;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.resteasy.spi.ResteasyDeployment;
@@ -85,6 +91,19 @@ class JaxrsSubsystemAdd extends AbstractBoottimeAddStepHandler {
 
         JaxrsServerConfig serverConfig = createServerConfig(operation, context);
         JaxrsServerConfigService.install(serviceTarget, serverConfig);
+
+        if (context.hasOptionalCapability(Capabilities.PRE_PROCESSING_WELD_CAPABILITY_NAME, null, null)) {
+            final PreProcessingWeldCapability preProcessingWeldCapability = context.getCapabilityRuntimeAPI(Capabilities.PRE_PROCESSING_WELD_CAPABILITY_NAME, PreProcessingWeldCapability.class);
+            // Per section 11.2.3 of the Jakarta REST 3.1 specification:
+            // In a product that supports CDI, implementations MUST support the use of CDI-style Beans as root resource
+            // classes, providers and Application subclasses. Providers and Application subclasses MUST be singletons or
+            // use application scope.
+            // Currently, these are not specified as @Stereotype annotations with a default scope. In a later spec this may
+            // happen, in which case these can be removed.
+            preProcessingWeldCapability.addBeanDefiningAnnotation(ApplicationPath.class, false)
+                    .addBeanDefiningAnnotation(Provider.class, false)
+                    .addBeanDefiningAnnotation(Path.class, false);
+        }
     }
 
     private static JaxrsServerConfig createServerConfig(ModelNode configuration, OperationContext context) throws OperationFailedException {

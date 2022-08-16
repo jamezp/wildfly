@@ -6,17 +6,21 @@ import static org.jboss.as.weld.util.Indices.getAnnotatedClasses;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.transaction.TransactionScoped;
 
+import org.jboss.as.controller.capability.CapabilityServiceSupport;
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.annotation.CompositeIndex;
+import org.jboss.as.weld.Capabilities;
 import org.jboss.as.weld.CdiAnnotations;
+import org.jboss.as.weld.PreProcessingWeldCapability;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.as.weld.discovery.AnnotationType;
 import org.jboss.jandex.ClassInfo;
@@ -34,10 +38,6 @@ public class BeanDefiningAnnotationProcessor implements DeploymentUnitProcessor 
 
     private static final DotName VIEW_SCOPED_NAME = DotName.createSimple("javax.faces.view.ViewScoped");
     private static final DotName FLOW_SCOPED_NAME = DotName.createSimple("javax.faces.flow.FlowScoped");
-    // Jakarta REST annotations
-    private static final DotName PROVIDER = DotName.createSimple("javax.ws.rs.ext.Provider");
-    private static final DotName APPLICATION_PATH = DotName.createSimple("javax.ws.rs.ApplicationPath");
-    private static final DotName PATH = DotName.createSimple("javax.ws.rs.Path");
 
     @Override
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
@@ -56,18 +56,21 @@ public class BeanDefiningAnnotationProcessor implements DeploymentUnitProcessor 
         addAnnotation(deploymentUnit, new AnnotationType(TransactionScoped.class));
         addAnnotation(deploymentUnit, new AnnotationType(VIEW_SCOPED_NAME, true));
         addAnnotation(deploymentUnit, new AnnotationType(FLOW_SCOPED_NAME, true));
-        // Per section 11.2.3 of the Jakarta REST 3.1 specification:
-        // In a product that supports CDI, implementations MUST support the use of CDI-style Beans as root resource
-        // classes, providers and Application subclasses. Providers and Application subclasses MUST be singletons or
-        // use application scope.
-        // Currently, these are not specified as @Stereotype annotations with a default scope. In a later spec this may
-        // happen, in which case these can be removed.
-        addAnnotation(deploymentUnit, new AnnotationType(PROVIDER, false));
-        addAnnotation(deploymentUnit, new AnnotationType(APPLICATION_PATH, false));
-        addAnnotation(deploymentUnit, new AnnotationType(PATH, false));
 
         for (AnnotationType annotationType : CdiAnnotations.BEAN_DEFINING_META_ANNOTATIONS) {
             addAnnotations(deploymentUnit, getAnnotationsAnnotatedWith(index, annotationType.getName()));
+        }
+
+
+        final CapabilityServiceSupport support = deploymentUnit.getAttachment(Attachments.CAPABILITY_SERVICE_SUPPORT);
+        // TODO (jrp) should this be optional? We do know here it will be registered, but in other DUP's it should definitely be optional
+        try {
+            final PreProcessingWeldCapability preProcessingWeldCapability = support.getCapabilityRuntimeAPI(Capabilities.PRE_PROCESSING_WELD_CAPABILITY_NAME, PreProcessingWeldCapability.class);
+            for (Map.Entry<String, Boolean> entry : preProcessingWeldCapability.getBeanDefiningAnnotations().entrySet()) {
+                addAnnotation(deploymentUnit, new AnnotationType(DotName.createSimple(entry.getKey()), entry.getValue()));
+            }
+        } catch (CapabilityServiceSupport.NoSuchCapabilityException e) {
+            throw new RuntimeException(e);
         }
     }
 

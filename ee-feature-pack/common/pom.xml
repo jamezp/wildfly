@@ -2471,6 +2471,18 @@
         </dependency>
 
         <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-tracing-api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+
+        <dependency>
             <groupId>org.jboss.seam.integration</groupId>
             <artifactId>jboss-seam-int-jbossas</artifactId>
         </dependency>

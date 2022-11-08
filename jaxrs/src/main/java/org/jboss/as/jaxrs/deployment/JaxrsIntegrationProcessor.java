@@ -546,6 +546,9 @@ public class JaxrsIntegrationProcessor implements DeploymentUnitProcessor {
         if (isTransmittable(JaxrsAttribute.RESTEASY_WIDER_REQUEST_MATCHING, modelNode = config.isResteasyWiderRequestMatching())) {
             setContextParameter(webdata, JaxrsConstants.RESTEASY_WIDER_REQUEST_MATCHING, modelNode.asString());
         }
+
+        // Add the context parameters
+        config.getContextParameters().forEach((key, value) -> setContextParameter(webdata, key, value));
     }
 
     /**

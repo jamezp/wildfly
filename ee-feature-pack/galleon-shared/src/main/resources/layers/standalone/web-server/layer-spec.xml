@@ -1,10 +1,8 @@
 <?xml version="1.0" ?>
 <layer-spec xmlns="urn:jboss:galleon:layer-spec:1.0" name="web-server">
     <dependencies>
-        <layer name="naming"/>
-        <layer name="ee-integration"/>
+        <layer name="ee"/>
         <layer name="deployment-scanner" optional="true"/>
-        <layer name="undertow"/>
+        <layer name="servlet"/>
     </dependencies>
-    <feature-group name="undertow-servlet"/>
 </layer-spec>

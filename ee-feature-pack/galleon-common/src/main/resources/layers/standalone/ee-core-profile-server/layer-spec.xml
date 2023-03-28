@@ -22,9 +22,8 @@
     <dependencies>
         <layer name="core-server"/>
         <layer name="cdi"/>
-        <!-- Required for global modules, but excludes default concurrency. -->
         <layer name="ee-integration"/>
-        <layer name="jaxrs"/>
+        <layer name="jaxrs-core"/>
         <layer name="jsonp"/>
         <layer name="jsonb"/>
     </dependencies>

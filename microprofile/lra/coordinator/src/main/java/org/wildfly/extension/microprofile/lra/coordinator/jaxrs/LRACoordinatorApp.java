@@ -22,29 +22,22 @@
 
 package org.wildfly.extension.microprofile.lra.coordinator.jaxrs;
 
+import java.util.Set;
+
+import jakarta.ws.rs.core.Application;
+
 import io.narayana.lra.coordinator.api.Coordinator;
 import io.narayana.lra.coordinator.api.CoordinatorContainerFilter;
 
-import jakarta.ws.rs.core.Application;
-import java.util.HashSet;
-import java.util.Set;
-
 public class LRACoordinatorApp extends Application {
-    private final Set<Class<?>> classes = new HashSet<>();
-    private final Set<Object> singletons = new HashSet<>();
+    private final Set<Class<?>> classes;
 
     public LRACoordinatorApp() {
-        classes.add(Coordinator.class);
-        singletons.add(new CoordinatorContainerFilter());
+        classes = Set.of(Coordinator.class, CoordinatorContainerFilter.class);
     }
 
     @Override
     public Set<Class<?>> getClasses() {
         return classes;
-    }
-
-    @Override
-    public Set<Object> getSingletons() {
-        return singletons;
     }
 }

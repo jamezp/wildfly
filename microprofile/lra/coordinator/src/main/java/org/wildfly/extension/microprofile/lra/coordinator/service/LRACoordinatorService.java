@@ -22,26 +22,22 @@
 
 package org.wildfly.extension.microprofile.lra.coordinator.service;
 
-import io.undertow.servlet.api.Deployment;
+import java.util.function.Supplier;
+
+import jakarta.servlet.ServletException;
+
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.ListenerInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.servlet.api.ServletInfo;
 import org.jboss.msc.Service;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
-import org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher;
-import org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap;
+import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.wildfly.extension.microprofile.lra.coordinator._private.MicroProfileLRACoordinatorLogger;
 import org.wildfly.extension.microprofile.lra.coordinator.jaxrs.LRACoordinatorApp;
 import org.wildfly.extension.undertow.Host;
-
-import jakarta.servlet.ServletException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
 
 public final class LRACoordinatorService implements Service {
 
@@ -50,8 +46,10 @@ public final class LRACoordinatorService implements Service {
 
     private final Supplier<Host> undertow;
 
-    private volatile DeploymentManager deploymentManager = null;
-    private volatile Deployment deployment = null;
+    // Guarded by this
+    private DeploymentManager deploymentManager = null;
+    // Guarded by this
+    private DeploymentInfo deploymentInfo = null;
 
     public LRACoordinatorService(Supplier<Host> undertow) {
         this.undertow = undertow;
@@ -70,52 +68,43 @@ public final class LRACoordinatorService implements Service {
     private void deployCoordinator() {
         undeployServlet();
 
-        final Map<String, String> initialParameters = new HashMap<>();
-        initialParameters.put("jakarta.ws.rs.Application", LRACoordinatorApp.class.getName());
-
         MicroProfileLRACoordinatorLogger.LOGGER.startingCoordinator(CONTEXT_PATH);
-        final DeploymentInfo coordinatorDeploymentInfo = getDeploymentInfo(DEPLOYMENT_NAME, CONTEXT_PATH, initialParameters);
-        deployServlet(coordinatorDeploymentInfo);
+        deploymentInfo = createDeploymentInfo();
+        deployServlet();
     }
 
-    private DeploymentInfo getDeploymentInfo(final String name, final String contextPath, final Map<String, String> initialParameters) {
-        final DeploymentInfo deploymentInfo = new DeploymentInfo();
-        deploymentInfo.setClassLoader(LRACoordinatorApp.class.getClassLoader());
-        deploymentInfo.setContextPath(contextPath);
-        deploymentInfo.setDeploymentName(name);
-        // JAX-RS setup
-        ServletInfo restEasyServlet = new ServletInfo("RESTEasy", HttpServletDispatcher.class).addMapping("/*");
-        deploymentInfo.addServlets(restEasyServlet);
-        ListenerInfo restEasyListener = new ListenerInfo(ResteasyBootstrap.class);
-        deploymentInfo.addListener(restEasyListener);
-
-        for (Map.Entry<String, String> entry : initialParameters.entrySet()) {
-            deploymentInfo.addInitParameter(entry.getKey(), entry.getValue());
-        }
-
-        return deploymentInfo;
+    private DeploymentInfo createDeploymentInfo() {
+        final DeploymentInfo deploymentInfo = new DeploymentInfo()
+                .addInitParameter("jakarta.ws.rs.Application", LRACoordinatorApp.class.getName())
+                .setClassLoader(LRACoordinatorApp.class.getClassLoader())
+                .setContextPath(CONTEXT_PATH)
+                .setDeploymentName(DEPLOYMENT_NAME);
+        // REST setup
+        final ServletInfo restEasyServlet = new ServletInfo("RESTEasy-LRA-Coordinator", HttpServlet30Dispatcher.class).addMapping("/*");
+        return deploymentInfo.addServlets(restEasyServlet);
     }
 
-    private void deployServlet(final DeploymentInfo deploymentInfo) {
-        deploymentManager = ServletContainer.Factory.newInstance().addDeployment(deploymentInfo);
+    private void deployServlet() {
+        // Get the servlet container from the host
+        final ServletContainer container = undertow.get().getServer().getServletContainer().getServletContainer();
+        // Add the deployment to get the deployment manager
+        deploymentManager = container.addDeployment(deploymentInfo);
         deploymentManager.deploy();
-        deployment = deploymentManager.getDeployment();
 
         try {
             undertow.get()
-                .registerDeployment(deployment, deploymentManager.start());
+                    .registerDeployment(deploymentManager.getDeployment(), deploymentManager.start());
         } catch (ServletException e) {
-            deployment = null;
+            MicroProfileLRACoordinatorLogger.LOGGER.tracef(e, "Failed to register LRA coordinator deployment: %s", deploymentInfo.getDeploymentName());
         }
     }
 
     private void undeployServlet() {
+        // Safeguard against the undeploy in the start
         if (deploymentManager != null) {
-            if (deployment != null) {
-                undertow.get()
-                        .unregisterDeployment(deployment);
-                deployment = null;
-            }
+            // Unregister the current deployment from the host
+            undertow.get()
+                    .unregisterDeployment(deploymentManager.getDeployment());
             try {
                 deploymentManager.stop();
             } catch (ServletException e) {
@@ -123,6 +112,9 @@ public final class LRACoordinatorService implements Service {
             } finally {
                 deploymentManager.undeploy();
             }
+            // Remove the deployment from the servlet container
+            ServletContainer container = undertow.get().getServer().getServletContainer().getServletContainer();
+            container.removeDeployment(deploymentInfo);
             deploymentManager = null;
         }
     }

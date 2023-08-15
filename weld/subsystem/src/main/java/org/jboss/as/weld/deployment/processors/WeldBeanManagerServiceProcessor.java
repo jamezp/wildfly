@@ -126,6 +126,7 @@ public class WeldBeanManagerServiceProcessor implements DeploymentUnitProcessor 
         SetupAction action = new WeldContextSetup();
         deploymentUnit.putAttachment(ATTACHMENT_KEY, action);
         deploymentUnit.addToAttachmentList(Attachments.SETUP_ACTIONS, action);
+        deploymentUnit.addToAttachmentList(org.jboss.as.ee.component.Attachments.OTHER_EE_SETUP_ACTIONS, action);
     }
 
     private void bindBeanManager(DeploymentUnit deploymentUnit, ServiceTarget serviceTarget, ServiceName beanManagerServiceName, ServiceName contextServiceName) {

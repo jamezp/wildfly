@@ -1,0 +1,59 @@
+# A workflow that can be called from other workflows as a way to use the nightly SNAPSHOT of WildFly for testing purposes.
+# This will attach an archive named "wildfly-maven-repository.tar.gz" which can be downloaded and extracted to use the
+# SNAPSHOT dependencies.
+#
+# An output setting of "wildfly-version" is set with the version of the SNAPSHOT dependencies.
+#
+# Example Usage:
+#
+# jobs:
+#   wildfly-build:
+#     uses: wildfly/wildfly/.github/workflows/shared-wildfly-nightly-build.yml@main
+#
+#   custom-build:
+#    runs-on: ubuntu-latest
+#    needs: wildfly-build
+#    steps:
+#      - uses: actions/checkout@v4
+#      - name: Set up JDK ${{ inputs.javaVersion }}
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: 11
+#          distribution: 'temurin'
+#          cache: 'maven'
+#      - name: Build on Linux with Java 11 using WildFly ${{ needs.wildfly-build.outputs.wildfly-version }}
+#        run: mvn clean verify '-Dversion.org.wildfly=${{ needs.wildfly-build.outputs.wildfly-version }}'
+
+name: Build WildFly Upstream
+
+on:
+  workflow_call:
+    outputs:
+      wildfly-version:
+        description: 'The version of WildFly from the nightly job'
+        value: ${{ jobs.wildfly-repo-download.outputs.wildfly-version }}
+
+jobs:
+  wildfly-repo-download:
+    runs-on: ubuntu-latest
+    outputs:
+      wildfly-version: ${{ steps.download.outputs.wildfly-version }}
+    steps:
+      - name: Download Maven Repository
+        id: download
+        shell: bash
+        working-directory: '${{ runner.temp }}'
+        # Download an extract the tar. Move the repository to the local maven repository and set the version for the output.
+        # The tar command is executed twice as technically these are two different
+        run: |
+          mkdir temp
+          cd temp
+          wget https://ci.wildfly.org/guestAuth/repository/download/WF_Nightly/latest.lastSuccessful/wildfly-maven-repository.tar.gz -O wildfly-maven-repository.tar.gz
+          tar xzf wildfly-maven-repository.tar.gz
+          tar xzf wildfly-maven-repository.tar.gz
+          mkdir -p "${HOME}/.m2/repository"
+          mv "./org" "${HOME}/.m2/repository"
+          echo "wildfly-version=$(cat version.txt)" >> $GITHUB_OUTPUT
+          echo "Deleting the temp directory"
+          cd ..
+          rm -rf temp

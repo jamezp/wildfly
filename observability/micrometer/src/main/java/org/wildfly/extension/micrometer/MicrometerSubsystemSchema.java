@@ -12,6 +12,7 @@ import org.jboss.as.controller.PersistentResourceXMLDescription;
 import org.jboss.as.controller.PersistentSubsystemSchema;
 import org.jboss.as.controller.SubsystemSchema;
 import org.jboss.as.controller.xml.VersionedNamespace;
+import org.jboss.as.version.Stability;
 import org.jboss.staxmapper.IntVersion;
 import org.wildfly.extension.micrometer.otlp.OtlpRegistryDefinitionRegistrar;
 import org.wildfly.extension.micrometer.prometheus.PrometheusRegistryDefinitionRegistrar;
@@ -19,7 +20,7 @@ import org.wildfly.extension.micrometer.prometheus.PrometheusRegistryDefinitionR
 public enum MicrometerSubsystemSchema implements PersistentSubsystemSchema<MicrometerSubsystemSchema> {
     VERSION_1_0(1, 0), // WildFly 28
     VERSION_1_1(1, 1), // WildFly 29.0.0.Alpha1
-    VERSION_2_0(2, 0) // WildFly 33
+    VERSION_2_0(2, 0, Stability.PREVIEW) // WildFly 33
     ;
 
     public static final MicrometerSubsystemSchema CURRENT = VERSION_2_0;
@@ -28,6 +29,11 @@ public enum MicrometerSubsystemSchema implements PersistentSubsystemSchema<Micro
 
     MicrometerSubsystemSchema(int major, int minor) {
         this.namespace = SubsystemSchema.createSubsystemURN(MicrometerConfigurationConstants.NAME,
+                new IntVersion(major, minor));
+    }
+
+    MicrometerSubsystemSchema(int major, int minor, Stability stability) {
+        this.namespace = SubsystemSchema.createSubsystemURN(MicrometerConfigurationConstants.NAME, stability,
                 new IntVersion(major, minor));
     }
 

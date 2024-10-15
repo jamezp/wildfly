@@ -5,7 +5,6 @@
 package org.wildfly.extension.micrometer;
 
 import static org.wildfly.extension.micrometer.MicrometerSubsystemModel.VERSION_1_1_0;
-import static org.wildfly.extension.micrometer.MicrometerSubsystemModel.VERSION_2_0_0;
 
 import org.jboss.as.controller.ModelVersion;
 import org.jboss.as.controller.transform.ExtensionTransformerRegistration;
@@ -26,21 +25,19 @@ public class MicrometerExtensionTransformerRegistration implements ExtensionTran
 
     @Override
     public void registerTransformers(SubsystemTransformerRegistration registration) {
+        final ModelVersion currentModel = registration.getCurrentSubsystemVersion();
         ChainedTransformationDescriptionBuilder chainedBuilder =
-                TransformationDescriptionBuilder.Factory.createChainedSubystemInstance(registration.getCurrentSubsystemVersion());
+                TransformationDescriptionBuilder.Factory.createChainedSubystemInstance(currentModel);
 
         // 2.0.0 (WildFly 34) to 1.1.0 (WildFly 33)
-        from2(chainedBuilder);
+        from2(chainedBuilder.createBuilder(currentModel, VERSION_1_1_0.getVersion()));
 
         chainedBuilder.buildAndRegister(registration, new ModelVersion[]{
-                VERSION_2_0_0.getVersion(),
                 VERSION_1_1_0.getVersion()
         });
     }
 
-    private void from2(ChainedTransformationDescriptionBuilder chainedBuilder) {
-        ResourceTransformationDescriptionBuilder builder =
-                chainedBuilder.createBuilder(VERSION_2_0_0.getVersion(), VERSION_1_1_0.getVersion());
+    private void from2(ResourceTransformationDescriptionBuilder builder) {
         builder.addChildRedirection(OtlpRegistryDefinitionRegistrar.PATH, MicrometerSubsystemRegistrar.PATH);
         builder.rejectChildResource(PrometheusRegistryDefinitionRegistrar.PATH);
     }

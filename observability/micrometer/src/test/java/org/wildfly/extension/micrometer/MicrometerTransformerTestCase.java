@@ -36,8 +36,8 @@ import org.wildfly.extension.micrometer.prometheus.PrometheusRegistryDefinitionR
 @RunWith(value = Parameterized.class)
 public class MicrometerTransformerTestCase extends AbstractSubsystemTest {
 
-    public final AdditionalInitialization additionalInitialization =
-            new AdditionalInitialization.ManagementAdditionalInitialization(Stability.PREVIEW);
+    public final AdditionalInitialization additionalInitialization = AdditionalInitialization
+            .withCapabilities(MicrometerSubsystemSchema.VERSION_2_0, "org.wildfly.management.executor", "org.wildfly.management.process-state-notifier");
 
     private final ModelTestControllerVersion controller;
     private final ModelVersion version;
@@ -50,7 +50,7 @@ public class MicrometerTransformerTestCase extends AbstractSubsystemTest {
     }
 
     public MicrometerTransformerTestCase(ModelTestControllerVersion controller, ModelVersion version) {
-        super(MicrometerConfigurationConstants.NAME, new MicrometerExtension());
+        super(MicrometerConfigurationConstants.NAME, new MicrometerExtension(), Stability.PREVIEW);
         this.controller = controller;
         this.version = version;
     }
@@ -88,7 +88,7 @@ public class MicrometerTransformerTestCase extends AbstractSubsystemTest {
         KernelServicesBuilder builder = createKernelServicesBuilder(additionalInitialization);
 
         // initialize the legacy services and add required jars
-        builder.createLegacyKernelServicesBuilder(additionalInitialization, controller, version)
+        builder.createLegacyKernelServicesBuilder(null, controller, version)
                 .skipReverseControllerCheck()
                 .addMavenResourceURL(getDependencies())
                 .dontPersistXml();
@@ -112,7 +112,7 @@ public class MicrometerTransformerTestCase extends AbstractSubsystemTest {
 
         if (VERSION_2_0_0.requiresTransformation(this.version)) {
             config.addFailedAttribute(subsystemAddress.append(PrometheusRegistryDefinitionRegistrar.PATH),
-                    new FailedOperationTransformationConfig.NewAttributesConfig(PrometheusRegistryDefinitionRegistrar.CONTEXT.getName()));
+                    FailedOperationTransformationConfig.REJECTED_RESOURCE);
         }
 
         return config;

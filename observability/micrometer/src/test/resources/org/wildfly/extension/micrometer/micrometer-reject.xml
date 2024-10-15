@@ -3,7 +3,7 @@
   ~ SPDX-License-Identifier: Apache-2.0
   -->
 
-<subsystem xmlns="urn:wildfly:micrometer:2.0">
+<subsystem xmlns="urn:wildfly:micrometer:preview:2.0">
     <otlp-registry endpoint="http://localhost:4318/v1/metrics"/>
     <prometheus-registry context="prometheus"/>
 </subsystem>

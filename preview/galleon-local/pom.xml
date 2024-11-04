@@ -36,6 +36,19 @@
         <dependency><groupId>io.opentelemetry.semconv</groupId><artifactId>opentelemetry-semconv</artifactId></dependency>
 
         <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-websockets-jsr</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>jakarta.data</groupId>
             <artifactId>jakarta.data-api</artifactId>
         </dependency>
@@ -61,6 +74,17 @@
         <dependency>
             <groupId>org.wildfly</groupId>
             <artifactId>wildfly-jakarta-data</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wildfly.clustering</groupId>
+            <artifactId>wildfly-clustering-session-spec-servlet-6.1</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

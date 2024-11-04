@@ -31,6 +31,8 @@
     <name>WildFly Preview: Dependency Management (Base Dependencies)</name>
 
     <properties>
+        <version.io.undertow>2.4.0.Beta1-SNAPSHOT</version.io.undertow>
+
         <version.jakarta.annotation.jakarta-annotation-api>3.0.0</version.jakarta.annotation.jakarta-annotation-api>
         <!-- TODO ElytronAuthConfigFactory uses removed field AuthConfigFactory.providerRegistrationSecurityPermission
         <version.jakarta.authentication.jakarta-authentication-api>3.1.0-M1</version.jakarta.authentication.jakarta-authentication-api>
@@ -73,6 +75,39 @@
             </dependency>
 
             <!-- Bom-specific dependencies. Keep sorted -->
+            <dependency>
+                <groupId>io.undertow</groupId>
+                <artifactId>undertow-core</artifactId>
+                <version>${version.io.undertow}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.undertow</groupId>
+                <artifactId>undertow-servlet</artifactId>
+                <version>${version.io.undertow}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>io.undertow</groupId>
+                <artifactId>undertow-websockets-jsr</artifactId>
+                <version>${version.io.undertow}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>*</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
             <dependency>
                 <groupId>jakarta.annotation</groupId>

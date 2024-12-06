@@ -34,9 +34,7 @@ public interface WildFlyRegistry {
         }
     }
 
-    default void close() {
-
-    }
+    void close();
 
     private Meter.Id addCounter(WildFlyMetric metric, MetricMetadata metadata) {
         return FunctionCounter.builder(metadata.getMetricName(), metric,

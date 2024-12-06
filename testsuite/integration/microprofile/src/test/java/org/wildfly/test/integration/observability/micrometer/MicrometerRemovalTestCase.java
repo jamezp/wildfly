@@ -14,12 +14,8 @@ import org.apache.commons.io.input.Tailer;
 import org.apache.commons.io.input.TailerListener;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.testcontainers.api.DockerRequired;
-import org.jboss.as.arquillian.api.ContainerResource;
-import org.jboss.as.arquillian.container.ManagementClient;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.controller.client.helpers.Operations;
-import org.jboss.as.test.shared.ServerReload;
-import org.jboss.as.test.shared.observability.setuptasks.AbstractSetupTask;
 import org.jboss.dmr.ModelNode;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,15 +23,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.plugin.tools.server.ServerManager;
 
 @RunWith(Arquillian.class)
-@DockerRequired
 @RunAsClient
 public class MicrometerRemovalTestCase {
     private static final String ERROR_MESSAGE = "Failed to publish metrics to OTLP receiver";
     private static final Logger log = LoggerFactory.getLogger(MicrometerRemovalTestCase.class);
-    @ContainerResource
-    ManagementClient managementClient;
+    private static final ModelNode micrometerExtension = Operations.createAddress("extension", "org.wildfly.extension.micrometer");
+    private static final ModelNode micrometerSubsystem = Operations.createAddress("subsystem", "micrometer");
+
+    @ArquillianResource
+    private ServerManager serverManager;
 
     private String logFilePath;
 
@@ -44,22 +43,27 @@ public class MicrometerRemovalTestCase {
         // /path=jboss.server.log.dir:read-attribute(name="path")
         ModelNode address = Operations.createAddress("path", "jboss.server.log.dir");
         ModelNode op = Operations.createReadAttributeOperation(address, "path");
-        final ModelNode result = managementClient.getControllerClient().execute(op);
+        final ModelNode result = serverManager.executeOperation(op);
         logFilePath = result.get("result").asString();
     }
 
     @Test
     public void testRemoval() throws Exception {
-        MicrometerSetupTask setupTask = new MicrometerSetupTask();
         ServerLogTailerListener listener = new ServerLogTailerListener();
-        try (Tailer ignored = Tailer.builder()
-            .setFile(new File(logFilePath, "server.log"))
-            .setTailerListener(listener)
-            .setDelayDuration(Duration.ofMillis(500))
-            .get()) {
-            setupTask.setup(managementClient, "");
+        try (
+                Tailer ignored = Tailer.builder()
+                        .setFile(new File(logFilePath, "server.log"))
+                        .setTailerListener(listener)
+                        .setDelayDuration(Duration.ofMillis(500))
+                        .get()
+        ) {
+            try {
+                setupSubsystem();
+                Thread.sleep(1000);
+            } finally {
+                removeSubsystem();
+            }
             Thread.sleep(1000);
-            setupTask.tearDown(managementClient, "");
             // Micrometer will push one last time while the registry is shutting down. Sleep long enough to allow that to
             // happen, then clear the log, wait, then check again. The server is configured to push every millisecond, so
             // 500 should be sufficient to give that time without slowing down the test suite more than necessary.
@@ -68,39 +72,37 @@ public class MicrometerRemovalTestCase {
             Thread.sleep(1000);
             System.out.println(listener.logs);
             Assert.assertTrue("Micrometer has been removed, but errors are still being logged.",
-                listener.logs.stream().noneMatch(l -> l.contains(ERROR_MESSAGE)));
+                    listener.logs.stream().noneMatch(l -> l.contains(ERROR_MESSAGE)));
         }
     }
 
-    public static class MicrometerSetupTask extends AbstractSetupTask {
-        private static final ModelNode micrometerExtension = Operations.createAddress("extension", "org.wildfly.extension.micrometer");
-        private static final ModelNode micrometerSubsystem = Operations.createAddress("subsystem", "micrometer");
-
-        @Override
-        public void setup(final ManagementClient managementClient, String containerId) throws Exception {
-            if (!Operations.isSuccessfulOutcome(executeRead(managementClient, micrometerExtension))) {
-                executeOp(managementClient, Operations.createAddOperation(micrometerExtension));
+    private void setupSubsystem() throws IOException {
+        try {
+            if (!Operations.isSuccessfulOutcome(serverManager.client()
+                    .execute(Operations.createReadResourceOperation(micrometerExtension)))) {
+                serverManager.executeOperation(Operations.createAddOperation(micrometerExtension));
             }
 
-            if (!Operations.isSuccessfulOutcome(executeRead(managementClient, micrometerSubsystem))) {
+            if (!Operations.isSuccessfulOutcome(serverManager.client()
+                    .execute(Operations.createReadResourceOperation(micrometerSubsystem)))) {
                 ModelNode addOp = Operations.createAddOperation(micrometerSubsystem);
                 addOp.get("endpoint").set("http://localhost:4318/v1/metrics/v1/metrics");
-                executeOp(managementClient, addOp);
+                serverManager.executeOperation(addOp);
             }
 
-            executeOp(managementClient, writeAttribute("micrometer", "endpoint",
-                "http://localhost:4318/v1/metrics/v1/metrics"));
-            executeOp(managementClient, writeAttribute("micrometer", "step", "1"));
-
-            ServerReload.reloadIfRequired(managementClient);
+            serverManager.executeOperation(Operations.createWriteAttributeOperation(micrometerSubsystem, "endpoint", "http://localhost:4318/v1/metrics/v1/metrics"));
+            serverManager.executeOperation(Operations.createWriteAttributeOperation(micrometerSubsystem, "step", "1"));
+        } finally {
+            serverManager.reloadIfRequired();
         }
+    }
 
-        @Override
-        public void tearDown(final ManagementClient managementClient, String containerId) throws Exception {
-            executeOp(managementClient, Operations.createRemoveOperation(micrometerSubsystem));
-            executeOp(managementClient, Operations.createRemoveOperation(micrometerExtension));
-
-            ServerReload.executeReloadAndWaitForCompletion(managementClient);
+    private void removeSubsystem() throws IOException {
+        try {
+            serverManager.executeOperation(Operations.createRemoveOperation(micrometerSubsystem));
+            serverManager.executeOperation(Operations.createRemoveOperation(micrometerExtension));
+        } finally {
+            serverManager.reloadIfRequired();
         }
     }
 

@@ -13,8 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 
 /**
@@ -28,7 +27,7 @@ public class EmptyServlet extends HttpServlet {
         try {
             final InitialContext ic = new InitialContext();
             ic.lookup("java:comp/env");
-            Assert.assertFalse(ic.list("java:comp/env").hasMore());
+            Assertions.assertFalse(ic.list("java:comp/env").hasMore());
             resp.getWriter().write("ok");
             resp.getWriter().close();
         } catch (NamingException e) {

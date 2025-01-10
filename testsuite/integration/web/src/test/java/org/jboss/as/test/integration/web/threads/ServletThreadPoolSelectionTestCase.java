@@ -6,7 +6,7 @@ package org.jboss.as.test.integration.web.threads;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.arquillian.api.ServerSetupTask;
@@ -15,8 +15,8 @@ import org.jboss.as.test.integration.common.HttpRequest;
 import org.jboss.dmr.ModelNode;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -28,8 +28,8 @@ import java.util.concurrent.Future;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests the use of a custom thread pool with servlet deployments.
@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
  * This creates an executor with a single thread, and then invokes RaceyServlet
  * multiple times from several threads. If it is not using the correct
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(ServletThreadPoolSelectionTestCase.ServletThreadPoolSelectionTestCaseSetupAction.class)
 public class ServletThreadPoolSelectionTestCase {

@@ -6,7 +6,7 @@ package org.jboss.as.test.integration.web.servlet.overlays;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.arquillian.api.ServerSetupTask;
@@ -21,8 +21,8 @@ import org.jboss.shrinkwrap.impl.base.path.BasicPath;
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
 import org.jboss.vfs.VirtualFilePermission;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.io.FilePermission;
@@ -38,12 +38,12 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUB
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VALUE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
 import static org.jboss.as.test.shared.PermissionUtils.createPermissionsXmlAsset;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(ServletResourceOverlaysTestCase.ServletResourceOverlaysTestCaseServerSetup.class)
 public class ServletResourceOverlaysTestCase {
@@ -126,7 +126,7 @@ public class ServletResourceOverlaysTestCase {
     public void testPathAccess() throws Exception {
         final String aTxtPath = "a.txt";
         final String aTxtAccess = performCall(url, "/check-path-access?path=a.txt&expected-accessible=true");
-        assertEquals("Unexpected result from call to " + aTxtPath, PathAccessCheckServlet.ACCESS_CHECKS_CORRECTLY_VALIDATED, aTxtAccess);
+        assertEquals(PathAccessCheckServlet.ACCESS_CHECKS_CORRECTLY_VALIDATED, aTxtAccess, "Unexpected result from call to " + aTxtPath);
 
         //Deployment root virtual file is different on each Operating System, we have to find out how to navigate to the root folder from the deployed file
         VirtualFile deploymentRoot = VFS.getChild("content/single.war");
@@ -147,7 +147,7 @@ public class ServletResourceOverlaysTestCase {
             }
             final String pathOutsideOfDeployment = accessRootPath.toString() + "/../../../../../../../" + canonicalPath;
             final String outsidePathAccessCheck = performCall(url, "/check-path-access?path=" + pathOutsideOfDeployment + "&expected-accessible=false");
-            assertEquals("Unexpected result from call to " + pathOutsideOfDeployment, PathAccessCheckServlet.ACCESS_CHECKS_CORRECTLY_VALIDATED, outsidePathAccessCheck);
+            assertEquals(PathAccessCheckServlet.ACCESS_CHECKS_CORRECTLY_VALIDATED, outsidePathAccessCheck, "Unexpected result from call to " + pathOutsideOfDeployment);
 
             fileUnderTest.delete();
         } else {

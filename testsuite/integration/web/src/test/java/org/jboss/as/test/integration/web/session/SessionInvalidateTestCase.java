@@ -4,7 +4,7 @@
  */
 package org.jboss.as.test.integration.web.session;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 
@@ -17,7 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.container.ManagementClient;
 import org.jboss.as.controller.PathAddress;
@@ -27,13 +27,13 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class SessionInvalidateTestCase {
 
@@ -56,8 +56,8 @@ public class SessionInvalidateTestCase {
             operation.get(ModelDescriptionConstants.OP_ADDR).set(PathAddress.parseCLIStyleAddress("/deployment=invalidate.war/subsystem=undertow").toModelNode());
             operation.get("session-id").set("fake");
             ModelNode opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
-            Assert.assertEquals(false, opRes.get(ModelDescriptionConstants.RESULT).asBoolean());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertFalse(opRes.get(ModelDescriptionConstants.RESULT).asBoolean());
             HttpGet get = new HttpGet("http://" + TestSuiteEnvironment.getServerAddress() + ":8080/invalidate/SessionPersistenceServlet");
             HttpResponse res = client.execute(get);
             String sessionId = null;
@@ -67,7 +67,7 @@ public class SessionInvalidateTestCase {
                     break;
                 }
             }
-            Assert.assertNotNull(sessionId);
+            Assertions.assertNotNull(sessionId);
             String result = EntityUtils.toString(res.getEntity());
             assertEquals("0", result);
             result = runGet(get, client);
@@ -77,8 +77,8 @@ public class SessionInvalidateTestCase {
 
             operation.get("session-id").set(sessionId);
             opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
-            Assert.assertEquals(true, opRes.get(ModelDescriptionConstants.RESULT).asBoolean());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertTrue(opRes.get(ModelDescriptionConstants.RESULT).asBoolean());
 
             result = runGet(get, client);
             assertEquals("0", result);

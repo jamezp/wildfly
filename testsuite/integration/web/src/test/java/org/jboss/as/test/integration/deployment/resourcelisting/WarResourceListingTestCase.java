@@ -5,7 +5,7 @@
 package org.jboss.as.test.integration.deployment.resourcelisting;
 
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.as.test.integration.common.WebInfLibClass;
 import org.jboss.as.test.shared.ResourceListingUtils;
 import org.jboss.logging.Logger;
@@ -15,9 +15,9 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -26,10 +26,10 @@ import java.util.Collections;
 import java.util.List;
 
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 public class WarResourceListingTestCase {
 
     private static final Logger log = Logger.getLogger(WarResourceListingTestCase.class);
@@ -55,32 +55,32 @@ public class WarResourceListingTestCase {
         return war;
     }
 
-    @Test()
+    @Test
     public void testRecursiveResourceRetrieval() {
         log.trace("Test recursive listing of resources");
         doTestResourceRetrieval(true, "/");
 
     }
 
-    @Test()
+    @Test
     public void testNonRecursiveResourceRetrieval() {
         log.trace("Test nonrecursive listing of resources");
         doTestResourceRetrieval(false, "/");
     }
 
-    @Test()
+    @Test
     public void testRecursiveResourceRetrievalForSpecifiedRootDir() {
         log.trace("Test recursive listing of resources in specific directory");
         doTestResourceRetrieval(true, "/WEB-INF");
     }
 
-    @Test()
+    @Test
     public void testNonRecursiveResourceRetrievalForSpecifiedRootDir() {
         log.trace("Test recursive listing of resources in specific directory");
         doTestResourceRetrieval(false, "/WEB-INF");
     }
 
-    @Test()
+    @Test
     public void testDirectResourceRetrieval() {
         log.trace("Test accessing resources using getResource method");
 
@@ -89,15 +89,15 @@ public class WarResourceListingTestCase {
         // checking that resource under META-INF is accessible
         URL manifestResource = classLoader.getResource("META-INF/example.txt");
 
-        assertNotNull("Resource in META-INF should be accessible", manifestResource);
+        assertNotNull(manifestResource, "Resource in META-INF should be accessible");
 
         // checking that resource under META-INF is accessible
         URL nestedManifestResource = classLoader.getResource("META-INF/properties/nested.properties");
-        assertNotNull("Nested resource should be also accessible", nestedManifestResource);
+        assertNotNull(nestedManifestResource, "Nested resource should be also accessible");
 
         // checking that resource which is not under META-INF is not accessible
         URL nonManifestResource = classLoader.getResource("example2.txt");
-        assertNull("Resource in the root of WAR shouldn't be accessible", nonManifestResource);
+        assertNull(nonManifestResource, "Resource in the root of WAR shouldn't be accessible");
     }
 
     /**
@@ -123,7 +123,7 @@ public class WarResourceListingTestCase {
             log.trace(foundResource);
         }
 
-        Assert.assertArrayEquals("Not all resources from WAR archive are correctly listed", resourcesInDeployment.toArray(), foundResources.toArray());
+        Assertions.assertArrayEquals(resourcesInDeployment.toArray(), foundResources.toArray(), "Not all resources from WAR archive are correctly listed");
     }
 
     /**

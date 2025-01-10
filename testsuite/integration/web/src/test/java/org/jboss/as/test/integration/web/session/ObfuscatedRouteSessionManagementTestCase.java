@@ -5,7 +5,7 @@
 package org.jboss.as.test.integration.web.session;
 
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.arquillian.api.ServerSetupTask;
 import org.jboss.as.arquillian.container.ManagementClient;
@@ -13,13 +13,12 @@ import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.operations.common.Util;
 import org.jboss.as.test.shared.ServerReload;
 import org.jboss.dmr.ModelNode;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.jboss.as.controller.client.helpers.ClientConstants.FAILURE_DESCRIPTION;
 import static org.jboss.as.controller.client.helpers.ClientConstants.OUTCOME;
 import static org.jboss.as.controller.client.helpers.ClientConstants.SUCCESS;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
-
-import org.junit.runner.RunWith;
 
 /**
  * Runs {@link SessionManagementTestCase} with Undertow subsystem {@code obfuscate-session-route} attribute set to
@@ -27,7 +26,7 @@ import org.junit.runner.RunWith;
  *
  * @author Flavia Rainone
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(ObfuscatedRouteSessionManagementTestCase.SetupTask.class)
 public class ObfuscatedRouteSessionManagementTestCase extends SessionManagementTestCase {

@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.arquillian.container.ManagementClient;
@@ -23,13 +23,13 @@ import org.jboss.as.test.shared.SnapshotRestoreSetupTask;
 import org.jboss.dmr.ModelNode;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.undertow.util.FileUtils;
 
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @ServerSetup(UnescapedURITestCase.Setup.class)
 @RunAsClient
 public class UnescapedURITestCase {
@@ -66,16 +66,16 @@ public class UnescapedURITestCase {
     @Test
     public void testForUnescapedCharacterInURLisRejected() throws Exception {
         String res = getResult(uri.getPort());
-        Assert.assertTrue(res, res.startsWith("HTTP/1.1 400"));
-        Assert.assertFalse(res, res.contains("ECHO")); //we should not have hit the servlet
+        Assertions.assertTrue(res.startsWith("HTTP/1.1 400"), res);
+        Assertions.assertFalse(res.contains("ECHO"), res); //we should not have hit the servlet
     }
 
 
     @Test
     public void testForUnescapedCharacterInURLisAccepted() throws Exception {
         String res = getResult(PORT);
-        Assert.assertTrue(res, res.startsWith("HTTP/1.1 200"));
-        Assert.assertTrue(res, res.contains("ECHO:/한 글"));
+        Assertions.assertTrue(res.startsWith("HTTP/1.1 200"), res);
+        Assertions.assertTrue(res.contains("ECHO:/한 글"), res);
     }
 
     String getResult(int port) throws Exception {

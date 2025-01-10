@@ -4,8 +4,7 @@
  */
 package org.jboss.as.test.integration.web.formauth;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -28,14 +27,14 @@ import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.container.ManagementClient;
 import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Tests of form authentication
@@ -43,7 +42,7 @@ import org.junit.runner.RunWith;
  * @author Scott.Stark@jboss.org
  * @author lbarreiro@redhat.com
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class FormAuthUnitTestCase {
 
@@ -117,13 +116,13 @@ public class FormAuthUnitTestCase {
 
         int statusCode = response.getStatusLine().getStatusCode();
         Header[] errorHeaders = response.getHeaders("X-NoJException");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
 
         HttpEntity entity = response.getEntity();
         if ((entity != null) && (entity.getContentLength() > 0)) {
             String body = EntityUtils.toString(entity);
-            assertTrue("Redirected to login page", body.indexOf("j_security_check") > 0);
+            assertTrue(body.indexOf("j_security_check") > 0, "Redirected to login page");
         } else {
             fail("Empty body in response");
         }
@@ -149,8 +148,8 @@ public class FormAuthUnitTestCase {
 
         statusCode = postResponse.getStatusLine().getStatusCode();
         errorHeaders = postResponse.getHeaders("X-NoJException");
-        assertTrue("Should see HTTP_OK. Got " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is not null", errorHeaders.length != 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Should see HTTP_OK. Got " + statusCode);
+        assertTrue(errorHeaders.length != 0, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is not null");
         log.debug("Saw X-JException, " + Arrays.toString(errorHeaders));
     }
 
@@ -182,8 +181,8 @@ public class FormAuthUnitTestCase {
 
         int statusCode = response.getStatusLine().getStatusCode();
         Header[] errorHeaders = response.getHeaders("X-NoJException");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
         EntityUtils.consume(response.getEntity());
 
         // Submit the form to /restricted/SecuredPostServlet
@@ -198,13 +197,13 @@ public class FormAuthUnitTestCase {
 
         statusCode = restrictedResponse.getStatusLine().getStatusCode();
         errorHeaders = restrictedResponse.getHeaders("X-NoJException");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
 
         HttpEntity entity = restrictedResponse.getEntity();
         if ((entity != null) && (entity.getContentLength() > 0)) {
             String body = EntityUtils.toString(entity);
-            assertTrue("Redirected to login page", body.indexOf("j_security_check") > 0);
+            assertTrue(body.indexOf("j_security_check") > 0, "Redirected to login page");
         } else {
             fail("Empty body in response");
         }
@@ -230,8 +229,8 @@ public class FormAuthUnitTestCase {
 
         statusCode = postResponse.getStatusLine().getStatusCode();
         errorHeaders = postResponse.getHeaders("X-NoJException");
-        assertTrue("Should see HTTP_MOVED_TEMP. Got " + statusCode, statusCode == HttpURLConnection.HTTP_MOVED_TEMP);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_MOVED_TEMP, statusCode, "Should see HTTP_MOVED_TEMP. Got " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
         EntityUtils.consume(postResponse.getEntity());
 
         // Follow the redirect to the SecureServlet
@@ -244,8 +243,8 @@ public class FormAuthUnitTestCase {
 
         statusCode = war1Response.getStatusLine().getStatusCode();
         errorHeaders = war1Response.getHeaders("X-NoJException");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
 
         HttpEntity war1Entity = war1Response.getEntity();
         if ((war1Entity != null) && (entity.getContentLength() > 0)) {
@@ -272,13 +271,13 @@ public class FormAuthUnitTestCase {
 
         int statusCode = response.getStatusLine().getStatusCode();
         Header[] errorHeaders = response.getHeaders("X-NoJException");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
 
         HttpEntity entity = response.getEntity();
         if ((entity != null) && (entity.getContentLength() > 0)) {
             String body = EntityUtils.toString(entity);
-            assertTrue("Redirected to login page", body.indexOf("j_security_check") > 0);
+            assertTrue(body.indexOf("j_security_check") > 0, "Redirected to login page");
         } else {
             fail("Empty body in response");
         }
@@ -304,8 +303,8 @@ public class FormAuthUnitTestCase {
 
         statusCode = postResponse.getStatusLine().getStatusCode();
         errorHeaders = postResponse.getHeaders("X-NoJException");
-        assertTrue("Should see HTTP_MOVED_TEMP. Got " + statusCode, statusCode == HttpURLConnection.HTTP_MOVED_TEMP);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_MOVED_TEMP, statusCode, "Should see HTTP_MOVED_TEMP. Got " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
         EntityUtils.consume(postResponse.getEntity());
 
         // Follow the redirect to the SecureServlet
@@ -318,8 +317,8 @@ public class FormAuthUnitTestCase {
 
         statusCode = war1Response.getStatusLine().getStatusCode();
         errorHeaders = war1Response.getHeaders("X-NoJException");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
 
         HttpEntity war1Entity = war1Response.getEntity();
         if ((war1Entity != null) && (entity.getContentLength() > 0)) {
@@ -351,7 +350,7 @@ public class FormAuthUnitTestCase {
 
         int statusCode = response.getStatusLine().getStatusCode();
         Header[] errorHeaders = response.getHeaders("X-NoJException");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-NoJException(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-NoJException(" + Arrays.toString(errorHeaders) + ") is null");
     }
 }

@@ -14,7 +14,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.jandex.Index;
 import org.jboss.jandex.IndexWriter;
@@ -26,12 +26,14 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.ByteArrayOutputStream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -39,14 +41,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Tests that servlets defined by annodations in a static module are picked up
  *
  * @author Stuart Douglas
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class WebModuleDeploymentTestCase {
 
@@ -59,7 +59,7 @@ public class WebModuleDeploymentTestCase {
         createTestModule(testModuleRoot);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception {
         File testModuleRoot = new File(getModulePath(), "org/jboss/test/webModule");
         File file = testModuleRoot;
@@ -166,7 +166,7 @@ public class WebModuleDeploymentTestCase {
             assertEquals(200, statusLine.getStatusCode());
 
             String result = EntityUtils.toString(entity);
-            Assert.assertEquals(ModuleServlet.MODULE_SERVLET, result);
+            Assertions.assertEquals(ModuleServlet.MODULE_SERVLET, result);
         }
     }
 }

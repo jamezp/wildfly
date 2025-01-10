@@ -16,7 +16,7 @@ import jakarta.websocket.WebSocketContainer;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.test.integration.security.WebSecurityPasswordBasedBase;
 import org.jboss.as.test.integration.web.security.WebTestsSecurityDomainSetup;
@@ -24,13 +24,13 @@ import org.jboss.as.test.shared.TestSuiteEnvironment;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * @author Stuart Douglas
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @ServerSetup(WebTestsSecurityDomainSetup.class)
 @RunAsClient
 public class WebSocketSecurityTestCase extends WebSecurityPasswordBasedBase {
@@ -63,7 +63,7 @@ public class WebSocketSecurityTestCase extends WebSecurityPasswordBasedBase {
 
         if (expectedCode == 200) {
             connectToServer(serverContainer, endpoint);
-            Assert.assertEquals("Hello anil", endpoint.getMessage());
+            Assertions.assertEquals("Hello anil", endpoint.getMessage());
         } else {
             boolean exceptionThrown = false;
             try {
@@ -71,8 +71,8 @@ public class WebSocketSecurityTestCase extends WebSecurityPasswordBasedBase {
             } catch (DeploymentException e) {
                 exceptionThrown = true;
             } finally {
-                Assert.assertTrue("We expected that 'DeploymentException' is thrown as we provided incorrect " +
-                        "credentials to ws endpoint.", exceptionThrown);
+                Assertions.assertTrue(exceptionThrown, "We expected that 'DeploymentException' is thrown as we provided incorrect " +
+                        "credentials to ws endpoint.");
             }
         }
     }

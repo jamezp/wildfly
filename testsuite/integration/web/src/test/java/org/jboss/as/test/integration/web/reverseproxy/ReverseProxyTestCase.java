@@ -12,7 +12,7 @@ import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ContainerResource;
 import org.jboss.as.arquillian.container.ManagementClient;
@@ -21,11 +21,13 @@ import org.jboss.as.test.integration.management.ManagementOperations;
 import org.jboss.dmr.ModelNode;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.net.URL;
 import java.util.HashSet;
@@ -35,21 +37,19 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ALL
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OPERATION_HEADERS;
 import static org.jboss.as.test.integration.management.util.ModelUtil.createOpNode;
 import org.jboss.as.test.shared.ServerReload;
-import org.junit.FixMethodOrder;
-import org.junit.runners.MethodSorters;
 
 /**
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 public class ReverseProxyTestCase {
 
     @ContainerResource
     private ManagementClient managementClient;
     private static ManagementClient mc;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         if (mc == null) {
             mc = managementClient;
@@ -115,7 +115,7 @@ public class ReverseProxyTestCase {
         return op;
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception {
 
         ModelNode op = new ModelNode();
@@ -188,7 +188,7 @@ public class ReverseProxyTestCase {
 
     private String performCall(CloseableHttpClient httpclient, String urlPattern) throws Exception {
         HttpResponse res =  httpclient.execute(new HttpGet("http://" + url.getHost() + ":" + url.getPort() + "/proxy/" + urlPattern));
-        Assert.assertEquals(200, res.getStatusLine().getStatusCode());
+        Assertions.assertEquals(200, res.getStatusLine().getStatusCode());
         return EntityUtils.toString(res.getEntity());
     }
 
@@ -200,9 +200,9 @@ public class ReverseProxyTestCase {
             for (int i = 0; i < 10; ++i) {
                 results.add(performCall(httpclient,"name"));
             }
-            Assert.assertEquals(2, results.size());
-            Assert.assertTrue(results.contains("server1"));
-            Assert.assertTrue(results.contains("server2"));
+            Assertions.assertEquals(2, results.size());
+            Assertions.assertTrue(results.contains("server1"));
+            Assertions.assertTrue(results.contains("server2"));
             //TODO: re-add JVM route based sticky session testing
             //String session = performCall("name?session=true");
             //sticky sessions should stick it to this node
@@ -233,7 +233,7 @@ public class ReverseProxyTestCase {
             HttpResponse res = httpclient.execute(new HttpGet("http://" + url.getHost() + ":" + url.getPort() + "/proxy/name?wait=50"));
             // With https://issues.redhat.com/browse/UNDERTOW-1459 fix, status code should be 504
             // FIXME: after undertow 2.2.13.Final integrated into WildFly, this should be updated to 504 only
-            Assert.assertTrue("Service Unaviable expected because max-request-time is set to 10ms", res.getStatusLine().getStatusCode() == 504 || res.getStatusLine().getStatusCode() == 503);
+            Assertions.assertTrue(res.getStatusLine().getStatusCode() == 504 || res.getStatusLine().getStatusCode() == 503, "Service Unaviable expected because max-request-time is set to 10ms");
         }
     }
 }

@@ -4,7 +4,7 @@
  */
 package org.jboss.as.test.integration.web.customerrors;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,13 +17,13 @@ import org.apache.http.impl.client.HttpClients;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Tests of custom error forwarding
@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
  * @author Scott.Stark@jboss.org
  * @author lbarreiro@redhat.com
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class CustomErrorsUnitTestCase {
 
@@ -115,12 +115,12 @@ public class CustomErrorsUnitTestCase {
             Header page = response.getFirstHeader("X-CustomErrorPage");
             Header error = response.getFirstHeader("X-ExceptionType");
 
-            assertTrue("Wrong response code: " + statusCode, statusCode == expectedCode);
+            assertEquals(statusCode, expectedCode, "Wrong response code: " + statusCode);
             if (expectedPage != null) {
-                assertTrue("X-CustomErrorPage(" + page + ") is " + expectedPage, page.getValue().equals(expectedPage));
+                assertEquals(page.getValue(), expectedPage, "X-CustomErrorPage(" + page + ") is " + expectedPage);
             }
             if (expectedError != null) {
-                assertTrue("X-ExceptionType(" + error + ") is " + expectedError, error.getValue().equals(expectedError));
+                assertEquals(error.getValue(), expectedError, "X-ExceptionType(" + error + ") is " + expectedError);
             }
         }
     }

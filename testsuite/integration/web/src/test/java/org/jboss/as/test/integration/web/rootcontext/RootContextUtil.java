@@ -12,7 +12,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OPE
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REMOVE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -111,8 +111,8 @@ import org.jboss.logging.Logger;
 
         int statusCode = response.getStatusLine().getStatusCode();
         Header[] errorHeaders = response.getHeaders("X-Exception");
-        assertTrue("Wrong response code: " + statusCode, statusCode == HttpURLConnection.HTTP_OK);
-        assertTrue("X-Exception(" + Arrays.toString(errorHeaders) + ") is null", errorHeaders.length == 0);
+        assertEquals(HttpURLConnection.HTTP_OK, statusCode, "Wrong response code: " + statusCode);
+        assertEquals(0, errorHeaders.length, "X-Exception(" + Arrays.toString(errorHeaders) + ") is null");
 
         return EntityUtils.toString(response.getEntity());
     }

@@ -6,13 +6,13 @@
 package org.jboss.as.test.integration.web.handlestypes;
 
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import jakarta.servlet.ServletContainerInitializer;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import java.util.HashSet;
 /**
  * @author Stuart Douglas
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 public class HandlesTypesWarTestCase {
 
     @Deployment
@@ -39,17 +39,17 @@ public class HandlesTypesWarTestCase {
     @Test
     public void testParentClass() {
         Class<?>[] expeccted = {HandlesTypesChild.class, HandlesTypesImplementor.class, HandlesTypesGandchild.class, HandlesTypesImplementorChild.class};
-        Assert.assertEquals(new HashSet<>(Arrays.asList(expeccted)), ParentServletContainerInitializer.HANDLES_TYPES);
+        Assertions.assertEquals(ParentServletContainerInitializer.HANDLES_TYPES, new HashSet<>(Arrays.asList(expeccted)));
     }
 
     @Test
     public void testChildClass() {
         Class<?>[] expeccted = {HandlesTypesGandchild.class, HandlesTypesImplementorChild.class};
-        Assert.assertEquals(new HashSet<>(Arrays.asList(expeccted)), ChildServletContainerInitializer.HANDLES_TYPES);
+        Assertions.assertEquals(ChildServletContainerInitializer.HANDLES_TYPES, new HashSet<>(Arrays.asList(expeccted)));
     }
     @Test
     public void testAnnotatedClass() {
         Class<?>[] expeccted = {AnnotatedParent.class, AnnotatedChild.class};
-        Assert.assertEquals(new HashSet<>(Arrays.asList(expeccted)), AnnotationServletContainerInitializer.HANDLES_TYPES);
+        Assertions.assertEquals(AnnotationServletContainerInitializer.HANDLES_TYPES, new HashSet<>(Arrays.asList(expeccted)));
     }
 }

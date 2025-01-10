@@ -22,15 +22,15 @@ import jakarta.websocket.WebSocketContainer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.test.shared.TestSuiteEnvironment;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Simple smoke test for WebSockets. It tests both basic use-cases - WebSocket client either as a standalone application
@@ -38,7 +38,7 @@ import org.junit.runner.RunWith;
  *
  * @author Stuart Douglas
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 public class WebSocketTestCase {
 
     private static final String CLIENT_STANDALONE = "standalone";
@@ -86,7 +86,7 @@ public class WebSocketTestCase {
         try (Session session = serverContainer.connectToServer(endpoint,
                 new URI("ws", "", TestSuiteEnvironment.getServerAddress(), TestSuiteEnvironment.getHttpPort(),
                         webapp.getPath() + "websocket/Stuart", "", ""))) {
-            Assert.assertEquals("Hello Stuart", endpoint.getMessage());
+            Assertions.assertEquals("Hello Stuart", endpoint.getMessage());
         }
     }
 

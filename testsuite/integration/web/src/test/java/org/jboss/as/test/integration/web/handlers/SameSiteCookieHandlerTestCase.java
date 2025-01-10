@@ -4,6 +4,8 @@
  */
 package org.jboss.as.test.integration.web.handlers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
@@ -18,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
@@ -31,18 +33,16 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Tests the use of SameSiteCookieHandler
  *
  * @author Flavia Rainone
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class SameSiteCookieHandlerTestCase {
 
@@ -157,13 +157,13 @@ public class SameSiteCookieHandlerTestCase {
             assertEquals(200, statusLine.getStatusCode());
 
             Header[] hdrs = response.getHeaders("set-cookie");
-            Assert.assertEquals(1, hdrs.length);
+            Assertions.assertEquals(1, hdrs.length);
             if (secure) {
                 String cookieValue = hdrs[0].getValue();
-                Assert.assertEquals("cookie=created-by-servlet; secure; SameSite=" + mode, cookieValue);
+                Assertions.assertEquals("cookie=created-by-servlet; secure; SameSite=" + mode, cookieValue);
             } else {
                 String expectedCookie = "cookie=created-by-servlet" + (mode == null? "" :"; SameSite=" + mode);
-                Assert.assertEquals(expectedCookie, hdrs[0].getValue());
+                Assertions.assertEquals(expectedCookie, hdrs[0].getValue());
             }
         }
     }

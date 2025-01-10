@@ -15,7 +15,7 @@ import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.test.module.util.TestModule;
 import org.jboss.as.test.shared.ModuleUtils;
@@ -23,13 +23,13 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class ExternalTagLibTestCase {
 
@@ -41,7 +41,7 @@ public class ExternalTagLibTestCase {
 
     private static final boolean isRunningWithBootableJar = Boolean.getBoolean("ts.bootable");
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception {
         if (!isRunningWithBootableJar) {
             testModule.remove();
@@ -83,7 +83,7 @@ public class ExternalTagLibTestCase {
             HttpResponse response = httpClient.execute(httpget);
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity);
-            Assert.assertTrue(result, result.contains("External Tag!"));
+            Assertions.assertTrue(result.contains("External Tag!"), result);
         }
     }
 
@@ -94,8 +94,8 @@ public class ExternalTagLibTestCase {
             HttpResponse response = httpClient.execute(httpget);
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity);
-            Assert.assertTrue(result, result.contains("External Tag!"));
-            Assert.assertTrue(result, result.contains("Internal Tag!"));
+            Assertions.assertTrue(result.contains("External Tag!"), result);
+            Assertions.assertTrue(result.contains("Internal Tag!"), result);
         }
     }
 

@@ -20,13 +20,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.arquillian.api.ServerSetupTask;
 import org.jboss.as.arquillian.container.ManagementClient;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.as.controller.client.OperationBuilder;
-import org.jboss.as.test.categories.CommonCriteria;
 import org.jboss.as.test.http.util.TestHttpClientUtils;
 import org.jboss.as.test.integration.management.util.CLIWrapper;
 import org.jboss.as.test.integration.web.security.WebTestsSecurityDomainSetup;
@@ -35,12 +34,12 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.wildfly.test.security.common.elytron.CredentialReference;
 import org.wildfly.test.security.common.elytron.Path;
 import org.wildfly.test.security.common.elytron.SimpleKeyManager;
@@ -54,10 +53,10 @@ import org.wildfly.test.undertow.common.elytron.SimpleHttpsListener;
  *
  * @author <a href="mailto:pskopek@redhat.com">Peter Skopek</a>
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup({WebTestsSecurityDomainSetup.class, TransportGuaranteeTestCase.ListenerSetup.class})
-@Category(CommonCriteria.class)
+@Tag("CommonCriteria")
 public class TransportGuaranteeTestCase {
 
     private static final Logger log = Logger.getLogger(TransportGuaranteeTestCase.class);
@@ -104,7 +103,7 @@ public class TransportGuaranteeTestCase {
         return war;
     }
 
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         // set test URL
         httpsTestURL = "https://" + TestSuiteEnvironment.getHttpAddress() + ":" + Integer.toString
@@ -112,7 +111,7 @@ public class TransportGuaranteeTestCase {
         httpTestURL = "http://" + TestSuiteEnvironment.getHttpAddress() + ":" + TestSuiteEnvironment.getHttpPort();
     }
 
-    @AfterClass
+    @AfterAll
     public static void after() throws IOException {
     }
 
@@ -201,14 +200,14 @@ public class TransportGuaranteeTestCase {
                 "TransportGuaranteedGet",
                 "anil",
                 "anil");
-        Assert.assertTrue("Not expected response", result);
+        Assertions.assertTrue(result, "Not expected response");
 
         result = checkGetURL(
                 httpTestURL + testURLContext,
                 null,
                 "anil",
                 "anil");
-        Assert.assertFalse("Non secure transport on URL has to be prevented, but was not", result);
+        Assertions.assertFalse(result, "Non secure transport on URL has to be prevented, but was not");
     }
 
     static class ListenerSetup implements ServerSetupTask {

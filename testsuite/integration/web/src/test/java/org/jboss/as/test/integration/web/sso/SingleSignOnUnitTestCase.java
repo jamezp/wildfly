@@ -8,18 +8,17 @@ import java.net.URL;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.arquillian.api.ServerSetupTask;
 import org.jboss.as.arquillian.container.ManagementClient;
-import org.jboss.as.test.categories.CommonCriteria;
 import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Tests of web app single sign-on
@@ -27,11 +26,11 @@ import org.junit.runner.RunWith;
  * @author Scott.Stark@jboss.org
  * @author lbarreiro@redhat.com
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(SingleSignOnUnitTestCase.SingleSignOnUnitTestCaseSetup.class)
-@Ignore(value = "ARQ-791 Arquillian is unable to reconnect to JMX server if the connection is lost")
-@Category(CommonCriteria.class)
+@Disabled(value = "ARQ-791 Arquillian is unable to reconnect to JMX server if the connection is lost")
+@Tag("CommonCriteria")
 public class SingleSignOnUnitTestCase {
 
     private static Logger log = Logger.getLogger(SingleSignOnUnitTestCase.class);

@@ -20,7 +20,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.arquillian.container.ManagementClient;
@@ -34,16 +34,16 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.xnio.IoUtils;
 
 import io.undertow.util.StatusCodes;
 
 /**
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(SessionStatisticsTestCase.SessionStatisticsServerSetup.class)
 public class SessionStatisticsTestCase {
@@ -95,99 +95,99 @@ public class SessionStatisticsTestCase {
             operation.get(ModelDescriptionConstants.INCLUDE_RUNTIME).set(true);
             operation.get(ModelDescriptionConstants.OP_ADDR).set(PathAddress.parseCLIStyleAddress("/deployment=stats.war/subsystem=undertow").toModelNode());
             ModelNode opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
             ModelNode result = opRes.get(ModelDescriptionConstants.RESULT);
             //check everything is zero
-            Assert.assertEquals(0, result.get(ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(EXPIRED_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(HIGHEST_SESSION_COUNT).asInt());
-            Assert.assertEquals(4, result.get(MAX_ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get("session-avg-alive-time").asInt());
-            Assert.assertEquals(0, result.get("session-max-alive-time").asInt());
-            Assert.assertEquals(0, result.get(SESSIONS_CREATED).asInt());
+            Assertions.assertEquals(0, result.get(ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(EXPIRED_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(HIGHEST_SESSION_COUNT).asInt());
+            Assertions.assertEquals(4, result.get(MAX_ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get("session-avg-alive-time").asInt());
+            Assertions.assertEquals(0, result.get("session-max-alive-time").asInt());
+            Assertions.assertEquals(0, result.get(SESSIONS_CREATED).asInt());
 
             final HttpGet get = new HttpGet(uri.toString() + "/SessionPersistenceServlet");
             final HttpGet invalidate = new HttpGet(get.getURI().toString() + "?invalidate=true");
             HttpResponse res = clients[0].execute(get);
-            Assert.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
+            Assertions.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
             EntityUtils.consume(res.getEntity());
             opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
             result = opRes.get(ModelDescriptionConstants.RESULT);
 
             //create a session and check that it worked
-            Assert.assertEquals(1, result.get(ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(EXPIRED_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(HIGHEST_SESSION_COUNT).asInt());
-            Assert.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(SESSIONS_CREATED).asInt());
+            Assertions.assertEquals(1, result.get(ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(EXPIRED_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(HIGHEST_SESSION_COUNT).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(SESSIONS_CREATED).asInt());
 
             //this should use the same session
             res = clients[0].execute(get);
-            Assert.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
+            Assertions.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
             EntityUtils.consume(res.getEntity());
             opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
             result = opRes.get(ModelDescriptionConstants.RESULT);
 
-            Assert.assertEquals(1, result.get(ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(EXPIRED_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(HIGHEST_SESSION_COUNT).asInt());
-            Assert.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(SESSIONS_CREATED).asInt());
+            Assertions.assertEquals(1, result.get(ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(EXPIRED_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(HIGHEST_SESSION_COUNT).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(SESSIONS_CREATED).asInt());
 
 
             res = clients[0].execute(invalidate);
-            Assert.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
+            Assertions.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
             EntityUtils.consume(res.getEntity());
 
             opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
             result = opRes.get(ModelDescriptionConstants.RESULT);
 
-            Assert.assertEquals(0, result.get(ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(EXPIRED_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(HIGHEST_SESSION_COUNT).asInt());
-            Assert.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(SESSIONS_CREATED).asInt());
+            Assertions.assertEquals(0, result.get(ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(EXPIRED_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(HIGHEST_SESSION_COUNT).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(0, result.get(REJECTED_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(SESSIONS_CREATED).asInt());
 
             for (int i = 0; i < CLIENT_COUNT; ++i) {
                 res = clients[i].execute(get);
-                Assert.assertEquals(i >= MAX_SESSIONS ? StatusCodes.INTERNAL_SERVER_ERROR : StatusCodes.OK, res.getStatusLine().getStatusCode());
+                Assertions.assertEquals(i >= MAX_SESSIONS ? StatusCodes.INTERNAL_SERVER_ERROR : StatusCodes.OK, res.getStatusLine().getStatusCode());
                 EntityUtils.consume(res.getEntity());
             }
 
             opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
             result = opRes.get(ModelDescriptionConstants.RESULT);
 
-            Assert.assertEquals(MAX_SESSIONS, result.get(ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(1, result.get(EXPIRED_SESSIONS).asInt());
-            Assert.assertEquals(MAX_SESSIONS, result.get(HIGHEST_SESSION_COUNT).asInt());
-            Assert.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(CLIENT_COUNT - MAX_SESSIONS, result.get(REJECTED_SESSIONS).asInt());
-            Assert.assertEquals(MAX_SESSIONS + 1, result.get(SESSIONS_CREATED).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(1, result.get(EXPIRED_SESSIONS).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(HIGHEST_SESSION_COUNT).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(CLIENT_COUNT - MAX_SESSIONS, result.get(REJECTED_SESSIONS).asInt());
+            Assertions.assertEquals(MAX_SESSIONS + 1, result.get(SESSIONS_CREATED).asInt());
 
             for (int i = 0; i < MAX_SESSIONS; ++i) {
                 res = clients[i].execute(invalidate);
-                Assert.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
+                Assertions.assertEquals(StatusCodes.OK, res.getStatusLine().getStatusCode());
                 EntityUtils.consume(res.getEntity());
             }
 
             opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
             result = opRes.get(ModelDescriptionConstants.RESULT);
 
-            Assert.assertEquals(0, result.get(ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(MAX_SESSIONS + 1, result.get(EXPIRED_SESSIONS).asInt());
-            Assert.assertEquals(MAX_SESSIONS, result.get(HIGHEST_SESSION_COUNT).asInt());
-            Assert.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
-            Assert.assertEquals(CLIENT_COUNT - MAX_SESSIONS, result.get(REJECTED_SESSIONS).asInt());
-            Assert.assertEquals(MAX_SESSIONS + 1, result.get(SESSIONS_CREATED).asInt());
+            Assertions.assertEquals(0, result.get(ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(MAX_SESSIONS + 1, result.get(EXPIRED_SESSIONS).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(HIGHEST_SESSION_COUNT).asInt());
+            Assertions.assertEquals(MAX_SESSIONS, result.get(MAX_ACTIVE_SESSIONS).asInt());
+            Assertions.assertEquals(CLIENT_COUNT - MAX_SESSIONS, result.get(REJECTED_SESSIONS).asInt());
+            Assertions.assertEquals(MAX_SESSIONS + 1, result.get(SESSIONS_CREATED).asInt());
 
 
         } finally {

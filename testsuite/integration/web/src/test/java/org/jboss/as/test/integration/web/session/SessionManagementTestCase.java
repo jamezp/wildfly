@@ -19,7 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.container.ManagementClient;
 import org.jboss.as.controller.PathAddress;
@@ -30,13 +30,13 @@ import org.jboss.dmr.Property;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class SessionManagementTestCase {
     private static final String SESSION_ID = "session-id";
@@ -69,8 +69,8 @@ public class SessionManagementTestCase {
             operation.get(ModelDescriptionConstants.OP).set(LIST_SESSIONS);
             operation.get(ModelDescriptionConstants.OP_ADDR).set(PathAddress.parseCLIStyleAddress("/deployment=management.war/subsystem=undertow").toModelNode());
             ModelNode opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
-            Assert.assertEquals(Collections.emptyList(), opRes.get(ModelDescriptionConstants.RESULT).asList());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
+            Assertions.assertEquals(Collections.emptyList(), opRes.get(ModelDescriptionConstants.RESULT).asList());
             long c1 = System.currentTimeMillis();
             HttpGet get = new HttpGet("http://" + TestSuiteEnvironment.getServerAddress() + ":8080/management/SessionPersistenceServlet");
             HttpResponse res = client.execute(get);
@@ -82,41 +82,41 @@ public class SessionManagementTestCase {
                     break;
                 }
             }
-            Assert.assertNotNull(sessionId);
+            Assertions.assertNotNull(sessionId);
             opRes = managementClient.getControllerClient().execute(operation);
-            Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
-            Assert.assertEquals(opRes.toString(), Collections.singletonList(new ModelNode(sessionId)), opRes.get(ModelDescriptionConstants.RESULT).asList());
+            Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
+            Assertions.assertEquals(Collections.singletonList(new ModelNode(sessionId)), opRes.get(ModelDescriptionConstants.RESULT).asList(), opRes.toString());
 
             operation.get(SESSION_ID).set(sessionId);
 
             opRes = executeOperation(operation, GET_SESSION_CREATION_TIME_MILLIS);
             long time1 = opRes.get(ModelDescriptionConstants.RESULT).asLong();
-            Assert.assertTrue(c1 <= time1);
-            Assert.assertTrue(time1 <= c2);
+            Assertions.assertTrue(c1 <= time1);
+            Assertions.assertTrue(time1 <= c2);
 
             opRes = executeOperation(operation, GET_SESSION_CREATION_TIME);
             long sessionCreationTime = LocalDateTime.parse(opRes.get(ModelDescriptionConstants.RESULT).asString(), DateTimeFormatter.ISO_DATE_TIME).toInstant(ZoneId.systemDefault().getRules().getOffset(Instant.now())).toEpochMilli();
-            Assert.assertEquals(time1, sessionCreationTime);
+            Assertions.assertEquals(time1, sessionCreationTime);
 
             opRes = executeOperation(operation, GET_SESSION_LAST_ACCESSED_TIME_MILLIS);
-            Assert.assertEquals(time1, opRes.get(ModelDescriptionConstants.RESULT).asLong());
+            Assertions.assertEquals(time1, opRes.get(ModelDescriptionConstants.RESULT).asLong());
 
             opRes = executeOperation(operation, GET_SESSION_LAST_ACCESSED_TIME);
             long aTime2 = LocalDateTime.parse(opRes.get(ModelDescriptionConstants.RESULT).asString(), DateTimeFormatter.ISO_DATE_TIME).toInstant(ZoneId.systemDefault().getRules().getOffset(Instant.now())).toEpochMilli();
-            Assert.assertEquals(time1, aTime2);
-            Assert.assertEquals(sessionCreationTime, aTime2);
+            Assertions.assertEquals(time1, aTime2);
+            Assertions.assertEquals(sessionCreationTime, aTime2);
 
             opRes = executeOperation(operation, LIST_SESSION_ATTRIBUTE_NAMES);
             List<ModelNode> resultList = opRes.get(ModelDescriptionConstants.RESULT).asList();
-            Assert.assertEquals(1, resultList.size());
-            Assert.assertEquals(opRes.toString(), "val", resultList.get(0).asString());
+            Assertions.assertEquals(1, resultList.size());
+            Assertions.assertEquals("val", resultList.get(0).asString(), opRes.toString());
 
             opRes = executeOperation(operation, LIST_SESSION_ATTRIBUTES);
             List<Property> properties = opRes.get(ModelDescriptionConstants.RESULT).asPropertyList();
-            Assert.assertEquals(opRes.toString(), 1, properties.size());
+            Assertions.assertEquals(1, properties.size(), opRes.toString());
             Property property = properties.get(0);
-            Assert.assertEquals(opRes.toString(), "val", property.getName());
-            Assert.assertEquals(opRes.toString(), "0", property.getValue().asString());
+            Assertions.assertEquals("val", property.getName(), opRes.toString());
+            Assertions.assertEquals("0", property.getValue().asString(), opRes.toString());
 
             //we want to make sure that the values will be different
             //so we wait 10ms
@@ -137,21 +137,21 @@ public class SessionManagementTestCase {
                     break;
                 }
             } while (System.currentTimeMillis() < a1 + 1000);
-            Assert.assertTrue(a1 <= time1);
-            Assert.assertTrue(time1 <= a2);
+            Assertions.assertTrue(a1 <= time1);
+            Assertions.assertTrue(time1 <= a2);
 
             opRes = executeOperation(operation, GET_SESSION_LAST_ACCESSED_TIME);
             long time2 = LocalDateTime.parse(opRes.get(ModelDescriptionConstants.RESULT).asString(), DateTimeFormatter.ISO_DATE_TIME).toInstant(ZoneId.systemDefault().getRules().getOffset(Instant.now())).toEpochMilli();
-            Assert.assertEquals(time1, time2);
+            Assertions.assertEquals(time1, time2);
 
             operation.get(ATTRIBUTE).set("val");
             opRes = executeOperation(operation, GET_SESSION_ATTRIBUTE);
-            Assert.assertEquals("1", opRes.get(ModelDescriptionConstants.RESULT).asString());
+            Assertions.assertEquals("1", opRes.get(ModelDescriptionConstants.RESULT).asString());
 
             executeOperation(operation, INVALIDATE_SESSION);
 
             opRes = executeOperation(operation, LIST_SESSIONS);
-            Assert.assertEquals(Collections.emptyList(), opRes.get(ModelDescriptionConstants.RESULT).asList());
+            Assertions.assertEquals(Collections.emptyList(), opRes.get(ModelDescriptionConstants.RESULT).asList());
         }
     }
 
@@ -188,7 +188,7 @@ public class SessionManagementTestCase {
             operation.get(ATTRIBUTE).set("non-existing");
 
             ModelNode opRes = executeOperation(operation, GET_SESSION_ATTRIBUTE);
-            Assert.assertEquals("undefined", opRes.get(ModelDescriptionConstants.RESULT).asString());
+            Assertions.assertEquals("undefined", opRes.get(ModelDescriptionConstants.RESULT).asString());
 
             // Invalidate created session.
             executeOperation(operation, INVALIDATE_SESSION);
@@ -199,7 +199,7 @@ public class SessionManagementTestCase {
         operation.get(ModelDescriptionConstants.OP).set(operationName);
 
         ModelNode opRes = managementClient.getControllerClient().execute(operation);
-        Assert.assertEquals(opRes.toString(), "success", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+        Assertions.assertEquals("success", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
 
         return opRes;
     }
@@ -208,8 +208,8 @@ public class SessionManagementTestCase {
         operation.get(ModelDescriptionConstants.OP).set(operationName);
 
         ModelNode opRes = managementClient.getControllerClient().execute(operation);
-        Assert.assertEquals(opRes.toString(), "failed", opRes.get(ModelDescriptionConstants.OUTCOME).asString());
+        Assertions.assertEquals("failed", opRes.get(ModelDescriptionConstants.OUTCOME).asString(), opRes.toString());
         String failDesc = opRes.get(ModelDescriptionConstants.FAILURE_DESCRIPTION).asString();
-        Assert.assertTrue(failDesc.contains("WFLYUT0100"));
+        Assertions.assertTrue(failDesc.contains("WFLYUT0100"));
     }
 }

@@ -4,9 +4,7 @@
  */
 package org.jboss.as.test.integration.web.security.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.URL;
 
@@ -23,10 +21,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ServerSetup;
-import org.jboss.as.test.categories.CommonCriteria;
 import org.jboss.as.test.integration.security.WebSecurityPasswordBasedBase;
 import org.jboss.as.test.integration.web.security.SecuredServlet;
 import org.jboss.as.test.integration.web.security.WebTestsSecurityDomainSetup;
@@ -34,18 +31,18 @@ import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Unit Test the BASIC authentication
  *
  * @author Anil Saldhana
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(WebTestsSecurityDomainSetup.class)
-@Category(CommonCriteria.class)
+@Tag("CommonCriteria")
 public class WebSecurityBASICTestCase extends WebSecurityPasswordBasedBase {
     private static final Logger log = Logger.getLogger(WebSecurityBASICTestCase.class);
 
@@ -97,10 +94,10 @@ public class WebSecurityBASICTestCase extends WebSecurityPasswordBasedBase {
     }
 
     private void checkResponsecontent(String response, String user, String password) {
-        assertNotNull("Response is 'null', we expected non-null response!", response);
-        assertTrue("Remote user different from what we expected!", response.contains("Remote user: " + user));
-        assertTrue("User principal different from what we expected!", response.contains("User principal: " + password));
-        assertTrue("Authentication type different from what we expected!", response.contains("Authentication type: " +
-                "BASIC"));
+        assertNotNull(response, "Response is 'null', we expected non-null response!");
+        assertTrue(response.contains("Remote user: " + user), "Remote user different from what we expected!");
+        assertTrue(response.contains("User principal: " + password), "User principal different from what we expected!");
+        assertTrue(response.contains("Authentication type: " +
+                "BASIC"), "Authentication type different from what we expected!");
     }
 }

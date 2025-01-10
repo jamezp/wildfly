@@ -4,8 +4,7 @@
  */
 package org.jboss.as.test.integration.web.cookie;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -23,13 +22,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.logging.Logger;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Test case for cookie
@@ -37,7 +36,7 @@ import org.junit.runner.RunWith;
  * @author prabhat.jha@jboss.com
  * @author lbarreiro@redhat.com
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class CookieUnitTestCase {
 
@@ -85,11 +84,11 @@ public class CookieUnitTestCase {
             // assert that we are able to hit servlet successfully
             int postStatusCode = response.getStatusLine().getStatusCode();
             Header[] postErrorHeaders = response.getHeaders("X-Exception");
-            assertTrue("Wrong response code: " + postStatusCode, postStatusCode == HttpURLConnection.HTTP_OK);
-            assertTrue("X-Exception(" + Arrays.toString(postErrorHeaders) + ") is null", postErrorHeaders.length == 0);
+            assertEquals(HttpURLConnection.HTTP_OK, postStatusCode, "Wrong response code: " + postStatusCode);
+            assertEquals(0, postErrorHeaders.length, "X-Exception(" + Arrays.toString(postErrorHeaders) + ") is null");
 
             List<Cookie> cookies = context.getCookieStore().getCookies();
-            assertTrue("Sever did not set expired cookie on client", checkNoExpiredCookie(cookies));
+            assertTrue(checkNoExpiredCookie(cookies), "Sever did not set expired cookie on client");
 
             for (Cookie cookie : cookies) {
                 log.trace("Cookie : " + cookie);
@@ -97,26 +96,26 @@ public class CookieUnitTestCase {
                 String cookieValue = cookie.getValue();
 
                 if (cookieName.equals("simpleCookie")) {
-                    assertTrue("cookie value should be jboss", cookieValue.equals("jboss"));
-                    assertEquals("cookie path", "/jbosstest-cookie", cookie.getPath());
-                    assertEquals("cookie persistence", false, cookie.isPersistent());
+                    assertEquals("jboss", cookieValue, "cookie value should be jboss");
+                    assertEquals("/jbosstest-cookie", cookie.getPath(), "cookie path");
+                    assertFalse(cookie.isPersistent(), "cookie persistence");
                 } else if (cookieName.equals("withSpace")) {
-                    assertEquals("should be no quote in cookie with space", cookieValue.indexOf("\""), -1);
+                    assertEquals(-1, cookieValue.indexOf("\""), "should be no quote in cookie with space");
                 } else if (cookieName.equals("comment")) {
                     log.trace("comment in cookie: " + cookie.getComment());
                     // RFC2109:Note that there is no Comment attribute in the Cookie request header
                     // corresponding to the one in the Set-Cookie response header. The user
                     // agent does not return the comment information to the origin server.
 
-                    assertTrue(cookie.getComment() == null);
+                    assertNull(cookie.getComment());
                 } else if (cookieName.equals("withComma")) {
-                    assertTrue("should contain a comma", cookieValue.indexOf(",") != -1);
+                    assertTrue(cookieValue.indexOf(",") != -1, "should contain a comma");
                 } else if (cookieName.equals("expireIn10Sec")) {
                     Date now = new Date();
                     log.trace("will sleep for 5 seconds to see if cookie expires");
-                    assertTrue("cookies should not be expired by now", !cookie.isExpired(new Date(now.getTime() + fiveSeconds)));
+                    assertFalse(cookie.isExpired(new Date(now.getTime() + fiveSeconds)), "cookies should not be expired by now");
                     log.trace("will sleep for 5 more secs and it should expire");
-                    assertTrue("cookies should be expired by now", cookie.isExpired(new Date(now.getTime() + 2 * fiveSeconds)));
+                    assertTrue(cookie.isExpired(new Date(now.getTime() + 2 * fiveSeconds)), "cookies should be expired by now");
                 }
             }
         }

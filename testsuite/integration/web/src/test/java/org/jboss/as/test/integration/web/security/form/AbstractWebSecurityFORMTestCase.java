@@ -4,7 +4,7 @@
  */
 package org.jboss.as.test.integration.web.security.form;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;

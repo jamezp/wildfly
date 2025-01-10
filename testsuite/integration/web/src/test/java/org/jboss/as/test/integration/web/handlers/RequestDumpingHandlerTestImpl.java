@@ -44,7 +44,7 @@ import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
 import org.jboss.as.test.integration.web.websocket.AnnotatedClient;
 import org.jboss.logging.Logger;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * Tests the use of Undertow request dumping handler. This is base class that implements particular test behaviour and controls
@@ -134,8 +134,8 @@ public abstract class RequestDumpingHandlerTestImpl {
      * @throws FileNotFoundException
      */
     private String readLogFile(Path logFilePath, long skipBytes) throws FileNotFoundException, IOException {
-        Assert.assertTrue("Log file ('" + logFilePath + "') does not exist", logFilePath.toFile().exists());
-        Assert.assertTrue("The '" + logFilePath + "' is not a file", logFilePath.toFile().isFile());
+        Assertions.assertTrue(logFilePath.toFile().exists(), "Log file ('" + logFilePath + "') does not exist");
+        Assertions.assertTrue(logFilePath.toFile().isFile(), "The '" + logFilePath + "' is not a file");
 
         // logfile exists -> read its content...
         LineNumberReader lnr = new LineNumberReader(Files.newBufferedReader(logFilePath, StandardCharsets.UTF_8));
@@ -189,8 +189,7 @@ public abstract class RequestDumpingHandlerTestImpl {
         log.trace("I have read following content of the file '" + logFilePath + "':\n" + content + "\n---END-OF-FILE-OUTPUT---");
 
         // Finally compare search result with our expectation...
-        Assert.assertEquals("Searching for pattern: '" + pattern + "' in log file ('" + logFilePath.toString() + "')",
-                expected, hasFound);
+        Assertions.assertEquals(expected, hasFound, "Searching for pattern: '" + pattern + "' in log file ('" + logFilePath.toString() + "')");
     }
 
     /**
@@ -259,7 +258,7 @@ public abstract class RequestDumpingHandlerTestImpl {
 
         if (hdrs.length > 0) {
             // Check that number of "header" occurrences equals to hdrs.length
-            Assert.assertEquals("", hdrs.length, countMatch(content, HEADER_REGEXP));
+            Assertions.assertEquals(hdrs.length, countMatch(content, HEADER_REGEXP), "");
 
             for (Header hdr : hdrs) {
                 // Close current scanner, reopen it and move to start pattern directly...
@@ -292,8 +291,9 @@ public abstract class RequestDumpingHandlerTestImpl {
         Pattern pattern = Pattern.compile(regExp);
         Matcher m = pattern.matcher(content);
 
-        Assert.assertEquals("Searching for pattern: '" + regExp + "' in log file ('" + logFilePath.toString() + "')", expected,
-                m.find());
+        Assertions.assertEquals(expected,
+                m.find(),
+                "Searching for pattern: '" + regExp + "' in log file ('" + logFilePath.toString() + "')");
     }
 
     /**
@@ -379,8 +379,8 @@ public abstract class RequestDumpingHandlerTestImpl {
 
             log.trace("The content of the URL ('" + uri + "'):\n" + sb.toString());
 
-            Assert.assertEquals(200, httpsConn.getResponseCode());
-            Assert.assertEquals("Could not reach expected content via http request", "A file", sb.toString());
+            Assertions.assertEquals(200, httpsConn.getResponseCode());
+            Assertions.assertEquals("A file", sb.toString(), "Could not reach expected content via http request");
 
             // NOTE: leaving request headers null (won't be checked) as there is no easy way how to obtain them
             return reqAndrespHeaders;
@@ -428,10 +428,10 @@ public abstract class RequestDumpingHandlerTestImpl {
                 ret[1] = response.getAllHeaders();
 
                 StatusLine statusLine = response.getStatusLine();
-                Assert.assertEquals(200, statusLine.getStatusCode());
+                Assertions.assertEquals(200, statusLine.getStatusCode());
 
                 String result = EntityUtils.toString(response.getEntity());
-                Assert.assertEquals("Could not reach expected content via http request", "A file", result);
+                Assertions.assertEquals("A file", result, "Could not reach expected content via http request");
             }
             return ret;
         }
@@ -458,7 +458,7 @@ public abstract class RequestDumpingHandlerTestImpl {
             AnnotatedClient endpoint = new AnnotatedClient();
             WebSocketContainer serverContainer = ContainerProvider.getWebSocketContainer();
             serverContainer.connectToServer(endpoint, uri);
-            Assert.assertEquals("Hello Stuart", endpoint.getMessage());
+            Assertions.assertEquals("Hello Stuart", endpoint.getMessage());
 
             // NOTE: leaving request and response headers null (won't be checked) as there is no easy way how to obtain them
             return null;

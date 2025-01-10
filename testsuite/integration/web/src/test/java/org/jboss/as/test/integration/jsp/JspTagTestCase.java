@@ -9,20 +9,20 @@ import java.util.concurrent.TimeUnit;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.test.integration.common.HttpRequest;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * See WFLY-2690
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 public class JspTagTestCase {
 
@@ -47,7 +47,7 @@ public class JspTagTestCase {
     @Test
     public void test(@ArquillianResource URL url) throws Exception {
         //we ignore line ending differences
-        Assert.assertEquals(RESULT.replace("\r", ""),HttpRequest.get(url + "index.jsp", 10, TimeUnit.SECONDS).replace("\r", ""));
-        Assert.assertEquals(RESULT.replace("\r", ""),HttpRequest.get(url + "index2.jsp", 10, TimeUnit.SECONDS).replace("\r", ""));
+        Assertions.assertEquals(RESULT.replace("\r", ""),HttpRequest.get(url + "index.jsp", 10, TimeUnit.SECONDS).replace("\r", ""));
+        Assertions.assertEquals(RESULT.replace("\r", ""),HttpRequest.get(url + "index2.jsp", 10, TimeUnit.SECONDS).replace("\r", ""));
     }
 }

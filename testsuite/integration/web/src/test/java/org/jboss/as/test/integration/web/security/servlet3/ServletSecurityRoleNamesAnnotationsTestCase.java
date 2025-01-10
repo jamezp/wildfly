@@ -8,25 +8,25 @@ import java.net.URL;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.as.test.categories.CommonCriteria;
 import org.jboss.as.test.integration.web.security.WebTestsSecurityDomainSetup;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Unit Test the 'rolesAllowed' annotations defined in servlet work as expected.
  *
  * @author Jan Stourac
  */
-@RunWith(Arquillian.class)
+@ExtendWith(ArquillianExtension.class)
 @RunAsClient
 @ServerSetup(WebTestsSecurityDomainSetup.class)
-@Category(CommonCriteria.class)
+@Tag("CommonCriteria")
 public class ServletSecurityRoleNamesAnnotationsTestCase extends ServletSecurityRoleNamesCommon {
     private static final String warName = ServletSecurityRoleNamesAnnotationsTestCase.class.getName();
 

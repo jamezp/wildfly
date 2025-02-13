@@ -5,6 +5,11 @@
 
 package org.jboss.as.jpa.processor;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.as.jpa.config.Configuration;
 import org.jboss.as.jpa.config.PersistenceUnitMetadataHolder;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
@@ -35,23 +40,34 @@ public class JPAClassFileTransformerProcessor implements DeploymentUnitProcessor
     }
 
     private void setClassLoaderTransformer(DeploymentUnit deploymentUnit) {
+        final Map<String, List<PersistenceUnitMetadata>> toTransform = new LinkedHashMap<>();
+
         // (AS7-2233) each persistence unit can use a persistence provider, that might need
         // to use ClassTransformers.  Providers that need class transformers will add them
         // during the call to CreateContainerEntityManagerFactory.
 
         DelegatingClassTransformer transformer = deploymentUnit.getAttachment(DelegatingClassTransformer.ATTACHMENT_KEY);
         boolean appContainsPersistenceProviderJars = false;  // remove when we revert WFLY-10520
-        if ( transformer != null) {
+        if (transformer != null) {
 
             for (ResourceRoot resourceRoot : DeploymentUtils.allResourceRoots(deploymentUnit)) {
                 PersistenceUnitMetadataHolder holder = resourceRoot.getAttachment(PersistenceUnitMetadataHolder.PERSISTENCE_UNITS);
                 if (holder != null) {
                     for (PersistenceUnitMetadata pu : holder.getPersistenceUnits()) {
-                        if (Configuration.needClassFileTransformer(pu)) {
-                            transformer.addTransformer(new JPADelegatingClassFileTransformer(pu));
+                        if (!Configuration.needClassFileTransformer(pu)) {
+                            return;
+                        }
+                        for (String className : pu.getManagedClassNames()) {
+                            // The transformer will use the path of the class, replace the separator for matching
+                            final String classPathName = className.replace('.', '/');
+                            final List<PersistenceUnitMetadata> persistentUnits = toTransform.computeIfAbsent(classPathName, k -> new ArrayList<>());
+                            persistentUnits.add(pu);
                         }
                     }
                 }
+            }
+            if (!toTransform.isEmpty()) {
+                transformer.addTransformer(new JPADelegatingClassFileTransformer(toTransform));
             }
         }
     }

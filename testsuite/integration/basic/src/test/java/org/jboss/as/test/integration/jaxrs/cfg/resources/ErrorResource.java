@@ -26,6 +26,7 @@ import jakarta.ws.rs.core.UriInfo;
 @Path("error")
 public class ErrorResource {
 
+    public static final String TEXT_TO_BE_SANITIZED = "SOME VERY SENSIBLE INFORMATION";
     @Inject
     private Client client;
 
@@ -60,7 +61,7 @@ public class ErrorResource {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         throw new WebApplicationException(
                 Response.status(Response.Status.UNAUTHORIZED)
-                        .entity(builder.add("error", String.format("User %s is not authorized", userId)).build())
+                        .entity(builder.add("error", String.format("[%s] User %s is not authorized", TEXT_TO_BE_SANITIZED, userId)).build())
                         .header("user-id", userId)
                         .type(MediaType.APPLICATION_JSON)
                         .build()
@@ -77,4 +78,23 @@ public class ErrorResource {
                 .get(JsonObject.class);
     }
 
+    /**
+     * Always throws an exception
+     */
+    @GET
+    @Path("/exception")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response throwException() {
+        throw new RuntimeException(String.format("[%s] Always throws an error containing sensible information!", TEXT_TO_BE_SANITIZED));
+    }
+
+    @GET
+    @Path("/client/exception")
+    @Produces(MediaType.APPLICATION_JSON)
+    public JsonObject throwExceptionClient() {
+        // This always throws an exception, the exception should always be a WebApplicationException
+        return client.target(uriInfo.getBaseUri()).path("/error/exception").request(MediaType.APPLICATION_JSON_TYPE)
+                // We use the get(Class<?>) here to ensure the error is thrown
+                .get(JsonObject.class);
+    }
 }

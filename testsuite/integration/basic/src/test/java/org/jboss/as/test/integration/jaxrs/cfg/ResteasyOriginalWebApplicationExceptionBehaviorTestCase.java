@@ -5,6 +5,8 @@
 
 package org.jboss.as.test.integration.jaxrs.cfg;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URI;
 
 import jakarta.json.JsonObject;
@@ -72,9 +74,18 @@ public class ResteasyOriginalWebApplicationExceptionBehaviorTestCase extends Abs
                 final String body = response.readEntity(String.class);
                 Assert.assertEquals(String.format("Expected 401 but got %d: %s - %s", response.getStatus(), response.getStatusInfo()
                         .getReasonPhrase(), body), 401, response.getStatus());
-                Assert.assertEquals("No body/content expected", "", body);
+                Assert.assertTrue(String.format("\"%s\" is expected in NOT the response!", ErrorResource.TEXT_TO_BE_SANITIZED), body == null || !body.contains(ErrorResource.TEXT_TO_BE_SANITIZED));
                 final MultivaluedMap<String, String> headers = response.getStringHeaders();
                 Assert.assertFalse(String.format("Expected the response headers %s to not include the user-id header", headers), headers.containsKey("user-id"));
+            }
+            try (
+                    Response response = client.target(exceptionUriBuilder())
+                            .request()
+                            .get()
+            ) {
+                Assert.assertEquals(500, response.getStatus());
+                final String body = response.readEntity(String.class);
+                Assert.assertTrue(String.format("\"%s\" is NOT expected in the response: \"%s\"", ErrorResource.TEXT_TO_BE_SANITIZED, body), body == null || !body.contains(ErrorResource.TEXT_TO_BE_SANITIZED));
             }
         }
     }
@@ -93,9 +104,20 @@ public class ResteasyOriginalWebApplicationExceptionBehaviorTestCase extends Abs
                 final String body = response.readEntity(String.class);
                 Assert.assertEquals(String.format("Expected 401 but got %d: %s - %s", response.getStatus(), response.getStatusInfo()
                         .getReasonPhrase(), body), 401, response.getStatus());
-                Assert.assertEquals("No body/content expected", "", body);
+                Assert.assertTrue(String.format("\"%s\" is NOT expected in the response!", ErrorResource.TEXT_TO_BE_SANITIZED), body == null || !body.contains(ErrorResource.TEXT_TO_BE_SANITIZED));
                 final MultivaluedMap<String, String> headers = response.getStringHeaders();
                 Assert.assertFalse(String.format("Expected the response headers %s to not include the user-id header", headers), headers.containsKey("user-id"));
+            }
+            try {
+                final String body = client.target(exceptionUriBuilder())
+                        .request()
+                        .get(String.class);
+                Assert.fail("Expected Exception to be thrown, but got a body of: " + body);
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                Assert.assertTrue(String.format("\"%s\" is NOT expected in the response!", ErrorResource.TEXT_TO_BE_SANITIZED), sw.toString() == null || !sw.toString().contains(ErrorResource.TEXT_TO_BE_SANITIZED));
             }
         }
     }
@@ -114,8 +136,18 @@ public class ResteasyOriginalWebApplicationExceptionBehaviorTestCase extends Abs
                 final JsonObject body = response.readEntity(JsonObject.class);
                 Assert.assertNotNull(body);
                 Assert.assertTrue("Expected an error body in " + body, body.containsKey("error"));
+                Assert.assertTrue(String.format("\"%s\" is expected in the response!", ErrorResource.TEXT_TO_BE_SANITIZED), body.toString().contains(ErrorResource.TEXT_TO_BE_SANITIZED));
                 final MultivaluedMap<String, String> headers = response.getStringHeaders();
                 Assert.assertTrue(String.format("Expected the response headers %s to include the user-id header", headers), headers.containsKey("user-id"));
+            }
+            try (
+                    Response response = client.target(exceptionUriBuilder())
+                            .request()
+                            .get()
+            ) {
+                Assert.assertEquals(500, response.getStatus());
+                final String body = response.readEntity(String.class);
+                Assert.assertTrue(String.format("\"%s\" is expected in the response!", ErrorResource.TEXT_TO_BE_SANITIZED), body != null && body.contains(ErrorResource.TEXT_TO_BE_SANITIZED));
             }
         }
     }
@@ -135,13 +167,29 @@ public class ResteasyOriginalWebApplicationExceptionBehaviorTestCase extends Abs
                 final JsonObject body = response.readEntity(JsonObject.class);
                 Assert.assertNotNull(body);
                 Assert.assertTrue("Expected an error body in " + body, body.containsKey("error"));
+                Assert.assertTrue(String.format("\"%s\" is expected in the response!", ErrorResource.TEXT_TO_BE_SANITIZED), body.toString().contains(ErrorResource.TEXT_TO_BE_SANITIZED));
                 final MultivaluedMap<String, String> headers = response.getStringHeaders();
                 Assert.assertTrue(String.format("Expected the response headers %s to include the user-id header", headers), headers.containsKey("user-id"));
+            }
+            try {
+                final String body = client.target(exceptionUriBuilder())
+                        .request()
+                        .get(String.class);
+                Assert.fail("Expected Exception to be thrown, but got a body of: " + body);
+            } catch (Exception e) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                e.fillInStackTrace().printStackTrace(pw);
+                Assert.assertTrue(String.format("\"%s\" is expected in the response: \"%s\"", ErrorResource.TEXT_TO_BE_SANITIZED, sw.toString()), sw.toString() != null && sw.toString().contains(ErrorResource.TEXT_TO_BE_SANITIZED));
             }
         }
     }
 
     private UriBuilder uriBuilder() {
         return UriBuilder.fromUri(uri).path("/test/error/client/no-auth");
+    }
+    private UriBuilder exceptionUriBuilder() {
+        return UriBuilder.fromUri(uri).path("/test/error/client/exception");
     }
 }

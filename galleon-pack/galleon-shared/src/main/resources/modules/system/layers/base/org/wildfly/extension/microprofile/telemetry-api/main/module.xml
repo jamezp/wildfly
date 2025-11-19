@@ -31,6 +31,8 @@
         <module name="org.wildfly.security.manager"/>
 
         <module name="java.logging"/>
+        <!-- Required to add a filter to the OpenTelemetryHandler handler -->
+        <module name="org.jboss.logmanager"/>
 
         <module name="jakarta.enterprise.api" />
         <module name="jakarta.ws.rs.api" optional="true" services="import"/>

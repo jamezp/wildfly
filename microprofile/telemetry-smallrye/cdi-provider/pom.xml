@@ -29,6 +29,11 @@
             <groupId>jakarta.ws.rs</groupId>
             <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
+        <!-- This is required to place a filter on the OpenTelemetryHandler -->
+        <dependency>
+            <groupId>org.jboss.logmanager</groupId>
+            <artifactId>jboss-logmanager</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.wildfly.security</groupId>

@@ -25,7 +25,6 @@ import org.jboss.modules.Module;
 import org.wildfly.extension.undertow.UndertowExtension;
 import org.wildfly.extension.undertow.logging.UndertowLogger;
 
-import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.server.ServerApplicationConfig;
 import jakarta.websocket.server.ServerEndpoint;
@@ -44,7 +43,6 @@ import java.util.Set;
 public class UndertowJSRWebSocketDeploymentProcessor implements DeploymentUnitProcessor {
 
     private static final DotName SERVER_ENDPOINT = DotName.createSimple(ServerEndpoint.class.getName());
-    private static final DotName CLIENT_ENDPOINT = DotName.createSimple(ClientEndpoint.class.getName());
     private static final DotName SERVER_APPLICATION_CONFIG = DotName.createSimple(ServerApplicationConfig.class.getName());
     private static final DotName ENDPOINT = DotName.createSimple(Endpoint.class.getName());
 
@@ -80,23 +78,6 @@ public class UndertowJSRWebSocketDeploymentProcessor implements DeploymentUnitPr
             final List<AnnotationInstance> serverEndpoints = index.getAnnotations(SERVER_ENDPOINT);
             if (serverEndpoints != null) {
                 for (AnnotationInstance endpoint : serverEndpoints) {
-                    if (endpoint.target() instanceof ClassInfo) {
-                        ClassInfo clazz = (ClassInfo) endpoint.target();
-                        try {
-                            Class<?> moduleClass = ClassLoadingUtils.loadClass(clazz.name().toString(), module);
-                            if (!Modifier.isAbstract(moduleClass.getModifiers())) {
-                                annotatedEndpoints.add(moduleClass);
-                            }
-                        } catch (ClassNotFoundException e) {
-                            UndertowLogger.ROOT_LOGGER.couldNotLoadWebSocketEndpoint(clazz.name().toString(), e);
-                        }
-                    }
-                }
-            }
-
-            final List<AnnotationInstance> clientEndpoints = index.getAnnotations(CLIENT_ENDPOINT);
-            if (clientEndpoints != null) {
-                for (AnnotationInstance endpoint : clientEndpoints) {
                     if (endpoint.target() instanceof ClassInfo) {
                         ClassInfo clazz = (ClassInfo) endpoint.target();
                         try {

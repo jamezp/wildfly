@@ -14,10 +14,12 @@
         <artifact name="${com.google.api.grpc:proto-google-common-protos}"/>
         <artifact name="${com.google.protobuf:protobuf-java}"/>
         <artifact name="${com.google.protobuf:protobuf-java-util}"/>
+        <artifact name="${io.perfmark:perfmark-api}" />
     </resources>
 
     <dependencies>
         <module name="com.google.guava"/>
+        <module name="com.google.code.gson" optional="true"/>
         <module name="java.logging"/>
     </dependencies>
 </module>

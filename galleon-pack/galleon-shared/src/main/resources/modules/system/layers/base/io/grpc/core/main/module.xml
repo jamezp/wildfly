@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright The WildFly Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<module xmlns="urn:jboss:module:1.9" name="io.grpc.core">
+    <properties>
+        <property name="jboss.api" value="private"/>
+    </properties>
+
+    <resources>
+        <artifact name="${io.grpc:grpc-context}"/>
+        <artifact name="${io.grpc:grpc-core}"/>
+        <artifact name="${io.grpc:grpc-protobuf}"/>
+        <artifact name="${io.grpc:grpc-protobuf-lite}"/>
+        <artifact name="${io.grpc:grpc-stub}"/>
+        <artifact name="${io.grpc:grpc-util}"/>
+    </resources>
+
+    <dependencies>
+        <module name="java.logging"/>
+        <module name="com.google.code.gson"/>
+        <module name="com.google.guava" />
+        <module name="com.google.protobuf" />
+        <module name="io.grpc" />
+    </dependencies>
+</module>

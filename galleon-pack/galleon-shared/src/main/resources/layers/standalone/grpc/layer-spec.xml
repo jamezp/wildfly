@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<!--
+  ~ Copyright The WildFly Authors
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<layer-spec xmlns="urn:jboss:galleon:layer-spec:2.0" name="grpc">
+    <props>
+        <prop name="org.wildfly.category" value="RPC (Remote Procedure Call)"/>
+        <prop name="org.wildfly.description" value="Support for gRPC services over HTTP/2."/>
+    </props>
+    <dependencies>
+        <layer name="management"/>
+        <layer name="cdi" />
+        <layer name="undertow" />
+    </dependencies>
+    <feature-group name="grpc"/>
+</layer-spec>

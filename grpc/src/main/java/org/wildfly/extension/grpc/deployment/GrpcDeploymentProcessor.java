@@ -33,6 +33,7 @@ import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.modules.Module;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceName;
+import org.wildfly.extension.grpc.Capabilities;
 import org.wildfly.extension.grpc.GrpcConfigurationConstants;
 import org.wildfly.extension.grpc.GrpcHttpHandler;
 import org.wildfly.extension.grpc.GrpcServerService;
@@ -166,10 +167,10 @@ public class GrpcDeploymentProcessor implements DeploymentUnitProcessor {
         // Install the MSC service with executor dependency
         final ServiceBuilder<?> builder = serviceTarget.addService(grpcServerServiceName);
 
-        // Create supplier for executor injection
-        // TODO (jrp) I don't think we should be using this as it's for the management layer
+        // Create supplier for executor injection from the default executor capability
+        // This delegates to the thread pool configured in the subsystem's default-thread-pool attribute
         final Supplier<Executor> executorSupplier = builder.requires(
-                capabilitySupport.getCapabilityServiceName("org.wildfly.management.executor")
+                capabilitySupport.getCapabilityServiceName(Capabilities.DEFAULT_EXECUTOR_CAPABILITY.getName())
         );
 
         // Create new service instance with injected dependencies

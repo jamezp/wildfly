@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -36,9 +37,13 @@ import io.grpc.internal.ServerTransport;
 import io.grpc.internal.ServerTransportListener;
 import io.grpc.internal.SharedResourceHolder;
 import io.undertow.server.HttpServerExchange;
+import org.jboss.msc.Service;
+import org.jboss.msc.service.StartContext;
+import org.jboss.msc.service.StartException;
+import org.jboss.msc.service.StopContext;
 
 /**
- * Service for the gRPC server.
+ * MSC service for the gRPC server.
  * <p>
  * This service creates and manages a gRPC server that integrates with Undertow's HTTP/2 transport. The server doesn't
  * bind to its own port - instead it uses Undertow's existing HTTP/2 listeners via the {@link GrpcHttpHandler}.
@@ -46,12 +51,12 @@ import io.undertow.server.HttpServerExchange;
  *
  * @author <a href="mailto:jperkins@ibm.com">James R. Perkins</a>
  */
-// TODO (jrp) consider making this a real service or renaming it as it's not an MSC service
-public class GrpcServerService {
+public class GrpcServerService implements Service {
 
     private final List<BindableService> services = new ArrayList<>();
     private final String deploymentContextPath;
-    private final Executor grpcExecutor;
+    private final Supplier<Executor> executorSupplier;
+    private final Consumer<GrpcHttpHandler> handlerConsumer;
     // TODO (jrp) we should make this configurable
     private final int maxInboundMessageSize = DEFAULT_MAX_MESSAGE_SIZE;
 
@@ -67,10 +72,15 @@ public class GrpcServerService {
      *
      * @param deploymentContextPath the deployment context path (e.g., "/grpc-helloworld")
      * @param executorSupplier      supplier for WildFly's managed executor for async operations
+     * @param handlerConsumer       consumer that receives the HTTP handler once service starts
      */
-    public GrpcServerService(final String deploymentContextPath, final Supplier<Executor> executorSupplier) {
+    public GrpcServerService(
+            final String deploymentContextPath,
+            final Supplier<Executor> executorSupplier,
+            final Consumer<GrpcHttpHandler> handlerConsumer) {
         this.deploymentContextPath = deploymentContextPath != null ? deploymentContextPath : "";
-        this.grpcExecutor = executorSupplier != null ? executorSupplier.get() : null;
+        this.executorSupplier = executorSupplier;
+        this.handlerConsumer = handlerConsumer;
     }
 
     /**
@@ -83,18 +93,22 @@ public class GrpcServerService {
     }
 
     /**
-     * Gets the HTTP handler for routing gRPC requests.
+     * Gets the list of registered services.
      *
-     * @return the gRPC HTTP handler, or null if not started
+     * @return the list of services
      */
-    public GrpcHttpHandler getHttpHandler() {
-        return httpHandler;
+    public List<BindableService> getServices() {
+        return new ArrayList<>(services);
     }
 
-    public void start() {
+    @Override
+    public void start(final StartContext context) throws StartException {
         LOGGER.startingGrpcServer();
 
         try {
+            // Get the executor from the injected supplier
+            final Executor grpcExecutor = executorSupplier != null ? executorSupplier.get() : null;
+
             // Create method name resolver that strips deployment context path
             methodNameResolver = createMethodNameResolver();
 
@@ -155,17 +169,23 @@ public class GrpcServerService {
                     grpcExecutor
             );
 
+            // Provide the handler to the consumer
+            if (handlerConsumer != null) {
+                handlerConsumer.accept(httpHandler);
+            }
+
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debugf("gRPC server started with %d services (context path: %s)",
                         services.size(), deploymentContextPath.isEmpty() ? "/" : deploymentContextPath);
             }
 
         } catch (final Exception e) {
-            throw LOGGER.failedToStartServer(e);
+            throw new StartException(LOGGER.failedToStartServer(e));
         }
     }
 
-    public void stop() {
+    @Override
+    public void stop(final StopContext context) {
         LOGGER.stoppingGrpcServer();
 
         try {

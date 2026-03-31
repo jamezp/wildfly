@@ -8,14 +8,15 @@ package org.wildfly.extension.grpc.deployment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import io.grpc.BindableService;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import org.jboss.as.controller.RequirementServiceTarget;
+import org.jboss.as.controller.capability.CapabilityServiceSupport;
 import org.jboss.as.ee.component.EEModuleDescription;
 import org.jboss.as.ee.structure.DeploymentType;
 import org.jboss.as.ee.structure.DeploymentTypeMarker;
@@ -30,6 +31,8 @@ import org.jboss.jandex.ClassInfo;
 import org.jboss.jandex.DotName;
 import org.jboss.metadata.web.jboss.JBossWebMetaData;
 import org.jboss.modules.Module;
+import org.jboss.msc.service.ServiceBuilder;
+import org.jboss.msc.service.ServiceName;
 import org.wildfly.extension.grpc.GrpcConfigurationConstants;
 import org.wildfly.extension.grpc.GrpcHttpHandler;
 import org.wildfly.extension.grpc.GrpcServerService;
@@ -96,7 +99,7 @@ public class GrpcDeploymentProcessor implements DeploymentUnitProcessor {
         }
 
         if (GrpcLogger.LOGGER.isDebugEnabled()) {
-        GrpcLogger.LOGGER.debugf("Found %d gRPC service(s) in deployment %s", serviceClasses.size(), deploymentUnit.getName());
+            GrpcLogger.LOGGER.debugf("Found %d gRPC service(s) in deployment %s", serviceClasses.size(), deploymentUnit.getName());
         }
         final WarMetaData warMetaData = deploymentUnit.getAttachment(WarMetaData.ATTACHMENT_KEY);
         if (warMetaData == null) {
@@ -129,21 +132,23 @@ public class GrpcDeploymentProcessor implements DeploymentUnitProcessor {
         GrpcLogger.LOGGER.infof("Registered gRPC deployment: %s (context path: %s)",
                 deploymentUnit.getName(), contextPath);
 
-        // Inject WildFly's default executor for async gRPC operations
-        final Supplier<Executor> executorSupplier;
-        try {
-            // TODO (jrp) this is not correct, but I'm just testing
-            final Executor executor = Executors.newCachedThreadPool();
-            executorSupplier = () -> executor;
-        } catch (Exception e) {
-            throw new DeploymentUnitProcessingException(
-                    "Failed to get default executor capability for gRPC", e);
-        }
+        // Get capability support for injecting dependencies
+        final CapabilityServiceSupport capabilitySupport = deploymentUnit.getAttachment(Attachments.CAPABILITY_SERVICE_SUPPORT);
 
-        // Create gRPC server with context path and executor
-        final GrpcServerService grpcServerService = new GrpcServerService(contextPath, executorSupplier);
+        // Create service name for the gRPC server
+        final ServiceName grpcServerServiceName = deploymentUnit.getServiceName().append("grpc-server");
 
-        // Instantiate and register services
+        // Holder for the HTTP handler (populated when service starts)
+        final GrpcHttpHandlerHolder handlerHolder = new GrpcHttpHandlerHolder();
+
+        // Create gRPC server service
+        final GrpcServerService grpcServerService = new GrpcServerService(
+                contextPath,
+                null,  // Will be injected by MSC
+                handlerHolder  // Consumer to receive handler
+        );
+
+        // Instantiate and register gRPC services
         for (ClassInfo serviceClass : serviceClasses) {
             try {
                 final BindableService service = instantiateService(serviceClass, module);
@@ -158,48 +163,45 @@ public class GrpcDeploymentProcessor implements DeploymentUnitProcessor {
             }
         }
 
-        // Start the server
-        try {
-            grpcServerService.start();
-            GrpcLogger.LOGGER.debugf("Started gRPC server for deployment %s",
-                    deploymentUnit.getName());
-        } catch (final Exception e) {
-            throw new DeploymentUnitProcessingException(
-                    "Failed to start gRPC server for: " + deploymentUnit.getName(), e);
+        // Install the MSC service with executor dependency
+        final ServiceBuilder<?> builder = serviceTarget.addService(grpcServerServiceName);
+
+        // Create supplier for executor injection
+        // TODO (jrp) I don't think we should be using this as it's for the management layer
+        final Supplier<Executor> executorSupplier = builder.requires(
+                capabilitySupport.getCapabilityServiceName("org.wildfly.management.executor")
+        );
+
+        // Create new service instance with injected dependencies
+        final GrpcServerService serviceWithDeps = new GrpcServerService(contextPath, executorSupplier, handlerHolder);
+
+        // Copy registered services to the new instance
+        for (final BindableService service : grpcServerService.getServices()) {
+            serviceWithDeps.addService(service);
         }
 
-        // Store in attachment for cleanup
-        deploymentUnit.putAttachment(GrpcAttachments.GRPC_SERVER_SERVICE, grpcServerService);
+        // Set the service instance
+        builder.setInstance(serviceWithDeps);
+
+        // Install the service
+        builder.install();
 
         // Attach the handler with proper delegation
-        if (grpcServerService.getHttpHandler() != null) {
-            deploymentUnit.addToAttachmentList(
-                    //UndertowAttachments.UNDERTOW_INNER_HANDLER_CHAIN_WRAPPERS,
-                    UndertowAttachments.UNDERTOW_INITIAL_HANDLER_CHAIN_WRAPPERS,
-                    (final HttpHandler next) -> new DelegatingGrpcHandler(grpcServerService.getHttpHandler(), next)
-            );
+        deploymentUnit.addToAttachmentList(
+                UndertowAttachments.UNDERTOW_INITIAL_HANDLER_CHAIN_WRAPPERS,
+                (final HttpHandler next) -> new DelegatingGrpcHandler(handlerHolder, next)
+        );
 
-            GrpcLogger.LOGGER.debugf("Attached gRPC handler for deployment %s",
-                    deploymentUnit.getName());
-        }
+        GrpcLogger.LOGGER.debugf("Installed gRPC server service for deployment %s",
+                deploymentUnit.getName());
     }
 
     @Override
     public void undeploy(final DeploymentUnit deploymentUnit) {
-        final GrpcServerService grpcServerService = deploymentUnit.getAttachment(GrpcAttachments.GRPC_SERVER_SERVICE);
 
-        if (grpcServerService != null) {
-            try {
-                grpcServerService.stop();
-            } catch (final Exception e) {
-                GrpcLogger.LOGGER.failedToStopServer(e, deploymentUnit.getName());
-            } finally {
-                deploymentUnit.removeAttachment(GrpcAttachments.GRPC_SERVER_SERVICE);
-
-                // Unregister from active deployments
-                GRPC_DEPLOYMENT.set(null);
-                GrpcLogger.LOGGER.debugf("Unregistered gRPC deployment: %s", deploymentUnit.getName());
-            }
+        // Unregister from active deployments
+        if (GRPC_DEPLOYMENT.compareAndSet(deploymentUnit.getName(), null)) {
+            GrpcLogger.LOGGER.debugf("Unregistered gRPC deployment: %s", deploymentUnit.getName());
         }
     }
 
@@ -248,32 +250,62 @@ public class GrpcDeploymentProcessor implements DeploymentUnitProcessor {
     }
 
     /**
+     * Holder for the gRPC HTTP handler that implements Consumer.
+     * The handler is set when the service starts.
+     */
+    private static class GrpcHttpHandlerHolder implements Consumer<GrpcHttpHandler> {
+        private volatile GrpcHttpHandler handler;
+
+        @Override
+        public void accept(final GrpcHttpHandler grpcHttpHandler) {
+            this.handler = grpcHttpHandler;
+        }
+
+        public GrpcHttpHandler get() {
+            return handler;
+        }
+    }
+
+    /**
      * Wrapper that delegates to gRPC handler for gRPC requests,
      * and passes through to next handler for non-gRPC requests.
      */
     private static class DelegatingGrpcHandler implements HttpHandler {
-        private final GrpcHttpHandler grpcHandler;
+        private final GrpcHttpHandlerHolder handlerHolder;
         private final HttpHandler nextHandler;
 
-        DelegatingGrpcHandler(final GrpcHttpHandler grpcHandler,
+        DelegatingGrpcHandler(final GrpcHttpHandlerHolder handlerHolder,
                               final HttpHandler nextHandler) {
-            this.grpcHandler = grpcHandler;
+            this.handlerHolder = handlerHolder;
             this.nextHandler = nextHandler;
         }
 
         @Override
         public void handleRequest(final HttpServerExchange exchange) throws Exception {
+            final GrpcHttpHandler grpcHandler = handlerHolder.get();
+            if (grpcHandler == null) {
+                // Service not started yet, pass through to next handler
+                nextHandler.handleRequest(exchange);
+                return;
+            }
+
             final boolean isGrpc = isGrpcRequest(exchange);
-            GrpcLogger.LOGGER.debugf("DelegatingGrpcHandler - path='%s', isGRPC=%s, protocol=%s, contentType=%s",
-                    exchange.getRequestPath(), isGrpc, exchange.getProtocol(),
-                    exchange.getRequestHeaders().getFirst(io.undertow.util.Headers.CONTENT_TYPE));
+            if (GrpcLogger.LOGGER.isDebugEnabled()) {
+                GrpcLogger.LOGGER.debugf("DelegatingGrpcHandler - path='%s', isGRPC=%s, protocol=%s, contentType=%s",
+                        exchange.getRequestPath(), isGrpc, exchange.getProtocol(),
+                        exchange.getRequestHeaders().getFirst(io.undertow.util.Headers.CONTENT_TYPE));
+            }
 
             // Check if this is a gRPC request
             if (isGrpc) {
-                GrpcLogger.LOGGER.debugf("Delegating to gRPC handler");
+                if (GrpcLogger.LOGGER.isDebugEnabled()) {
+                    GrpcLogger.LOGGER.debugf("Delegating to gRPC handler");
+                }
                 grpcHandler.handleRequest(exchange);
             } else {
-                GrpcLogger.LOGGER.debugf("Delegating to next handler");
+                if (GrpcLogger.LOGGER.isDebugEnabled()) {
+                    GrpcLogger.LOGGER.debugf("Delegating to next handler");
+                }
                 nextHandler.handleRequest(exchange);
             }
         }

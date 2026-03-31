@@ -1,0 +1,40 @@
+/*
+ * Copyright The WildFly Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "org.wildfly.test.integration.grpc.service";
+option java_outer_classname = "HelloWorldProto";
+
+package greeter;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  // Sends a goodbye
+  rpc SayGoodbye (HelloRequest) returns (HelloReply) {}
+}
+
+// The greeting service with streaming methods
+service StreamingGreeter {
+  // Server streaming
+  rpc SayHelloServerStream (HelloRequest) returns (stream HelloReply) {}
+  // Client streaming
+  rpc SayHelloClientStream (stream HelloRequest) returns (HelloReply) {}
+  // Bidirectional streaming
+  rpc SayHelloBidirectionalStream (stream HelloRequest) returns (stream HelloReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings.
+message HelloReply {
+  string message = 1;
+}

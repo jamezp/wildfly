@@ -64,6 +64,7 @@
                 <module>../integration/clustering</module>
                 <module>../integration/elytron</module>
                 <module>../integration/elytron-oidc-client</module>
+                <module>../integration/grpc</module>
                 <module>../integration/vdx</module>
                 <module>../integration/iiop</module>
                 <module>../integration/xts</module>
@@ -96,6 +97,7 @@
                 <module>../integration/smoke</module>
                 <module>../test-feature-pack</module> <!-- needed by integration/basic -->
                 <module>../integration/basic</module>
+                <module>../integration/grpc</module>
                 <module>../integration/vdx</module>
                 <module>../integration/iiop</module>
                 <module>../integration/xts</module>
@@ -181,6 +183,7 @@
                 <module>../integration/clustering</module>
                 <module>../integration/ws</module>
                 <module>../integration/elytron-oidc-client</module>
+                <module>../integration/grpc</module>
                 <module>../layers</module>
             </modules>
         </profile>
@@ -207,6 +210,7 @@
                 <module>../integration/smoke</module>
                 <module>../test-feature-pack</module> <!-- needed by integration/basic -->
                 <module>../integration/basic</module>
+                <module>../integration/grpc</module>
                 <module>../integration/vdx</module>
                 <module>../integration/clustering</module>
                 <module>../integration/iiop</module>
@@ -298,6 +302,7 @@
             <modules>
                 <module>../test-feature-pack</module> <!-- needed by integration/basic -->
                 <module>../integration/basic</module>
+                <module>../integration/grpc</module>
                 <module>../integration/clustering</module>
                 <module>../integration/elytron</module>
                 <module>../integration/elytron-oidc-client</module>

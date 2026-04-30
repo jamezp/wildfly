@@ -23,6 +23,10 @@
 
     <artifactId>wildfly-ee-10-expansion-build</artifactId>
 
+    <properties>
+        <central.deploymentName>wildfly-ee-10-expansion-build-${project.version}</central.deploymentName>
+    </properties>
+
     <name>WildFly: Legacy EE + Expansion Thin Server Build</name>
     <packaging>pom</packaging>
 

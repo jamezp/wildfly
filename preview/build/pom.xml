@@ -24,6 +24,10 @@
     <name>WildFly Preview: Thin Server Build</name>
     <packaging>pom</packaging>
 
+    <properties>
+        <central.deploymentName>wildfly-preview-build-${project.version}</central.deploymentName>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

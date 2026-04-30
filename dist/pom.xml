@@ -25,6 +25,10 @@
     <name>WildFly: Distribution</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <central.deploymentName>wildfly-dist-${project.version}</central.deploymentName>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

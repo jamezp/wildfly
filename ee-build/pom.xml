@@ -25,6 +25,10 @@
     <name>WildFly: EE Full Thin Server Build</name>
     <packaging>pom</packaging>
 
+    <properties>
+        <central.deploymentName>wildfly-ee-build-${project.version}</central.deploymentName>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${ee.maven.groupId}</groupId>

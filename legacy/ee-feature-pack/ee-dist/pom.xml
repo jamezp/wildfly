@@ -25,6 +25,10 @@
     <name>WildFly: Legacy EE Distribution</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <central.deploymentName>wildfly-ee-10-dist-${project.version}</central.deploymentName>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

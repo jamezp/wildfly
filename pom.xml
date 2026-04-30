@@ -141,6 +141,7 @@
         <autoPublish>false</autoPublish>
         <waitUntil>validated</waitUntil>
         <skipPublishing>false</skipPublishing>
+        <central.deploymentName>wildfly-${project.version}</central.deploymentName>
 
         <!-- Galleon -->
         <galleon.fork.embedded>true</galleon.fork.embedded>
@@ -2186,8 +2187,10 @@
                             <publishingServerId>${sonatype.server.id}</publishingServerId>
                             <autoPublish>${autoPublish}</autoPublish>
                             <waitUntil>${waitUntil}</waitUntil>
-                            <deploymentName>wildfly-${project.version}</deploymentName>
+                            <deploymentName>${central.deploymentName}</deploymentName>
                             <skipPublishing>${skipPublishing}</skipPublishing>
+                            <forcedOutputDirectory>${central.deploymentName}</forcedOutputDirectory>
+                            <outputFilename>${central.deploymentName}.zip</outputFilename>
                         </configuration>
                     </plugin>
                 </plugins>

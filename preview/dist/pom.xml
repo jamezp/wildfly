@@ -19,6 +19,10 @@
         <version>40.0.0.Beta1-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <central.deploymentName>wildfly-preview-dist-${project.version}</central.deploymentName>
+    </properties>
+
     <artifactId>wildfly-preview-dist</artifactId>
     <name>WildFly Preview: Distribution</name>
     <packaging>jar</packaging>

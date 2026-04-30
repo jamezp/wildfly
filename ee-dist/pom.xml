@@ -24,6 +24,10 @@
     <name>WildFly: EE Full Distribution</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <central.deploymentName>wildfly-ee-dist-${project.version}</central.deploymentName>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

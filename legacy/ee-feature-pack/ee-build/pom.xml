@@ -26,6 +26,10 @@
     <name>WildFly: Legacy EE Thin Server Build</name>
     <packaging>pom</packaging>
 
+    <properties>
+        <central.deploymentName>wildfly-ee-10-build-${project.version}</central.deploymentName>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

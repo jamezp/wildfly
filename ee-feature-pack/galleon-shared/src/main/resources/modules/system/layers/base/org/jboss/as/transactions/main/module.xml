@@ -21,6 +21,7 @@
 
     <dependencies>
         <module name="java.management"/>
+        <module name="jakarta.enterprise.api" optional="true"/>
         <module name="jakarta.resource.api"/>
         <module name="jakarta.transaction.api"/>
         <module name="org.jboss.staxmapper"/>
@@ -29,6 +30,7 @@
         <module name="org.jboss.as.naming"/>
         <module name="org.jboss.as.network"/>
         <module name="org.jboss.as.server"/>
+        <module name="org.jboss.as.web-common"/>
         <module name="org.jboss.jboss-transaction-spi"/>
         <module name="org.jboss.msc"/>
         <module name="org.jboss.logging"/>

@@ -4,6 +4,10 @@
  */
 package org.jboss.as.txn.deployment;
 
+import static org.jboss.as.weld.Capabilities.WELD_CAPABILITY_NAME;
+
+import com.arjuna.ats.jta.cdi.TransactionExtension;
+import org.jboss.as.controller.capability.CapabilityServiceSupport;
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
@@ -12,6 +16,7 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.annotation.CompositeIndex;
 import org.jboss.as.server.deployment.module.ModuleDependency;
 import org.jboss.as.server.deployment.module.ModuleSpecification;
+import org.jboss.as.weld.WeldCapability;
 import org.jboss.jandex.AnnotationInstance;
 import org.jboss.jandex.DotName;
 import org.jboss.modules.Module;
@@ -63,5 +68,14 @@ public class TransactionDependenciesProcessor implements DeploymentUnitProcessor
         final ModuleLoader moduleLoader = Module.getBootModuleLoader();
         final ModuleSpecification moduleSpec = unit.getAttachment(Attachments.MODULE_SPECIFICATION);
         moduleSpec.addSystemDependency(ModuleDependency.Builder.of(moduleLoader, JTS_MODULE).setImportServices(true).build());
+
+        // If this is a Weld deployment, register the CDI extension
+        final CapabilityServiceSupport support = unit.getAttachment(Attachments.CAPABILITY_SERVICE_SUPPORT);
+        if (support.hasCapability(WELD_CAPABILITY_NAME)) {
+            final WeldCapability api = support.getOptionalCapabilityRuntimeAPI(WELD_CAPABILITY_NAME, WeldCapability.class).orElse(null);
+            if (api != null && api.isWeldDeployment(unit)) {
+                api.registerExtensionInstance(new TransactionExtension(), unit);
+            }
+        }
     }
 }
